@@ -24,18 +24,18 @@ class LoginUser:
 
 class Student:
     '''student class that includes information regarding a student's name, email, grades/marks'''
-    def __init__(self, first_name, last_name, email_address, marks):
+    def __init__(self, first_name, last_name, email_address):
         self.first_name = first_name
         self.last_name = last_name
         self.email_address = email_address
-        self.marks = marks
-        self.courses = [] # has-many variable; differs for each student instance
-        self.grades = [] # has-many variable; differs for each student instance
+        self.marks = [] # has-many variable; calls from Grade
+        self.courses = [] # has-many variable; calls from Course
+        self.grades = [] # has-many variable; calls from Grade
 
     def display_records(self):
         '''displays student records'''
     
-    def add_new_student(self):
+    def add_new_student(self, student): # student from add_student()
         '''add a new student into the system'''
     
     def delete_student(self, last_name):
@@ -61,7 +61,7 @@ class Course:
     def display_courses(self):
         '''displays all courses'''
 
-    def add_new_course(self, id, credits, name):
+    def add_new_course(self, course): # course from add_course()
         '''add a new course'''
 
     def delete_course(self, id):
@@ -78,7 +78,7 @@ class Professor:
     def professors_details(self):
         '''displays all professors'''
 
-    def add_new_professor(self, name, email_address, rank, course_id):
+    def add_new_professor(self, professor): # professor from add_professor()
         '''add a new professor into the system'''
     
     def delete_professor(self, name):
@@ -100,7 +100,7 @@ class Grades:
     def display_grade_report(self):
         '''displays a report of all the grades'''
     
-    def add_grade(self, id, grade, marks):
+    def add_new_grade(self, grade): # grade from add_grade()
         '''add a new grade into the system'''
 
     def delete_grade(self, id):
@@ -108,3 +108,33 @@ class Grades:
 
     def modify_grade(self, id):
         '''change a grade using its id'''
+
+
+# HELPER FUNCTIONS
+def add_student():
+    '''gets student details for add_new_student()'''
+    first_name = input('Enter first name of student: ')
+    last_name = input('Enter last name of student: ')
+    email_address = input('Enter email of student: ')
+    return first_name.strip(), last_name.strip(), email_address.strip()
+
+def add_course():
+    '''gets course details for add_new_course()'''
+    course_id = input('Enter id of the course: ') # maybe randomly generate if a number?
+    credits = input('Enter the number of credits of the course: ')
+    course_name = input('Enter the name of the course: ')
+    return course_id.strip(), int(credits.strip()), course_name.strip()
+
+def add_professor():
+    '''gets professor details for add_new_professor()'''
+    name = input('Enter the name of the professor: ')
+    email_address = input('Enter the email of the professor: ')
+    rank = input('Enter the rank of the professor: ')
+    return name.strip(), email_address.strip(), int(rank.strip())
+
+def add_grade():
+    '''gets grade detauks for add_new_grade()'''
+    id = input('Enter id of the grade: ') # could be number?
+    grade = input('Enter the grade: ') # could be float percentage or letter?
+    marks = input('Enter marks: ') # get clarification on what this is
+    return id.strip(), float(grade.strip()), marks.strip()
