@@ -29,7 +29,7 @@ class Student:
         self.last_name = last_name
         self.email_address = email_address
         self.marks = [] # has-many variable; calls from Grade
-        self.courses = [] # has-many variable; calls from Course
+        self.course_ids = [] # has-many variable; calls from Course
         self.grades = [] # has-many variable; calls from Grade
 
     def display_records(self):
@@ -53,10 +53,11 @@ class Student:
 
 class Course:
     '''course class that includes information regarding a course's id, credits, name'''
-    def __init__(self, course_id, credits, course_name):
+    def __init__(self, course_id, credits, course_name, course_description):
         self.course_id = course_id
         self.credits = credits
         self.course_name = course_name
+        self.course_description = course_description
 
     def display_courses(self):
         '''displays all courses'''
@@ -92,10 +93,10 @@ class Professor:
     
 class Grades:
     '''grades class that includes information regarding a specific grade for a student'''
-    def __init__(self, id, grade, marks):
+    def __init__(self, id, grade, mark):
         self.id = id
         self.grade = grade
-        self.marks = marks
+        self.mark = mark
 
     def display_grade_report(self):
         '''displays a report of all the grades'''
@@ -120,7 +121,7 @@ def add_student():
 
 def add_course():
     '''gets course details for add_new_course()'''
-    course_id = input('Enter id of the course: ') # maybe randomly generate if a number?
+    course_id = input('Enter id of the course: ') # i.e. DATA200
     credits = input('Enter the number of credits of the course: ')
     course_name = input('Enter the name of the course: ')
     return course_id.strip(), int(credits.strip()), course_name.strip()
@@ -133,8 +134,8 @@ def add_professor():
     return name.strip(), email_address.strip(), int(rank.strip())
 
 def add_grade():
-    '''gets grade detauks for add_new_grade()'''
+    '''gets grade details for add_new_grade()'''
     id = input('Enter id of the grade: ') # could be number?
-    grade = input('Enter the grade: ') # could be float percentage or letter?
-    marks = input('Enter marks: ') # get clarification on what this is
-    return id.strip(), float(grade.strip()), marks.strip()
+    grade = input('Enter the grade: ') # letter grade 
+    mark = input('Enter mark: ') # integer percentage
+    return id.strip(), grade.strip(), int(mark.strip())
