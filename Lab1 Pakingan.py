@@ -20,6 +20,7 @@ class LoginUser:
             else:
                 print("Email does not exist!")
                 
+        # insert code for encrypting/decrypting password
 
     def logout(self):
         '''logs the current user out of the system'''
@@ -46,6 +47,19 @@ class Student:
 
     def display_records(self):
         '''displays student records'''
+    with open('student.csv', newline = '') as csvfile:
+        students = csv.reader(csvfile)
+        next(students)
+        student_data = [student for student in students]
+        
+    for student in student_data:
+        print(f'''
+              Name: {student[1]} {student[2]}
+              Email: {student[0]}
+              Courses: {student[3]}
+              Grade: {student[4]}
+              Mark: {student[5]}
+              ''')
     
     def add_new_student(self, student): # student from add_student()
         '''add a new student into the system'''
@@ -60,7 +74,7 @@ class Student:
         '''updates a student's record'''
 
     def check_my_marks(self, email_address):
-        '''checks a student's marks using their last name'''
+        '''checks a student's marks using their email address'''
 
 
 class Course:
@@ -153,7 +167,13 @@ def add_grade():
     return id.strip(), grade.strip(), int(mark.strip())
 
 if __name__ == "__main__":
+
+    # logging in
     email_address = input("Enter your email_address: ")
     password = getpass.getpass("Enter your password: ")
     login = LoginUser(email_address.strip(),password.strip())
     login.login()
+
+    # displaying student records
+    records = Student(first_name = None, last_name = None, email_address = None)
+    records.display_records()
