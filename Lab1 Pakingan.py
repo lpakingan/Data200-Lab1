@@ -38,16 +38,16 @@ class Student:
     def add_new_student(self, student): # student from add_student()
         '''add a new student into the system'''
     
-    def delete_student(self, last_name):
-        '''delete a student in the system using their last name'''
+    def delete_student(self, email_address):
+        '''delete a student in the system using their email address'''
 
-    def check_my_grades(self, last_name):
-        '''checks a student's grades using their last name'''
+    def check_my_grades(self, email_address):
+        '''checks a student's grades using their email address'''
 
-    def update_student_record(self, last_name):
+    def update_student_record(self, email_address):
         '''updates a student's record'''
 
-    def check_my_marks(self, last_name):
+    def check_my_marks(self, email_address):
         '''checks a student's marks using their last name'''
 
 
@@ -79,22 +79,22 @@ class Professor:
     def professors_details(self):
         '''displays all professors'''
 
-    def add_new_professor(self, professor): # professor from add_professor()
+    def add_new_professor(self, email_address): # professor from add_professor()
         '''add a new professor into the system'''
     
-    def delete_professor(self, name):
-        '''delete a professor using their name'''
+    def delete_professor(self, email_address):
+        '''delete a professor using their email address'''
 
-    def modify_professor_details(self, name):
-        '''modify a professor in the system using their name'''
+    def modify_professor_details(self, email_address):
+        '''modify a professor in the system using their email address'''
 
-    def show_course_details_by_professor(self, name):
-        '''show a professor's course using their name'''
+    def show_course_details_by_professor(self, email_address):
+        '''show a professor's course using their email address'''
     
 class Grades:
     '''grades class that includes information regarding a specific grade for a student'''
     def __init__(self, id, grade, mark):
-        self.id = id
+        self.id = id # email address to match with the student it is assigned to?
         self.grade = grade
         self.mark = mark
 
