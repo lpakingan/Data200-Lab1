@@ -1,4 +1,5 @@
 import getpass
+import csv
 
 class LoginUser:
     '''user class that includes a user's login information for the application'''
@@ -8,6 +9,17 @@ class LoginUser:
 
     def login(self):
         '''checks the login details of the current user and logs them in if correct'''
+        with open('login.csv', newline = '') as csvfile:
+            logins = csv.reader(csvfile)
+            next(logins)
+            login_data = [login for login in logins]
+        
+        for login in login_data:
+            if self.email_address == login[0]:
+                print("You are now logged in!") if self.password == login[1] else print("Wrong password!")
+            else:
+                print("Email does not exist!")
+                
 
     def logout(self):
         '''logs the current user out of the system'''
@@ -139,3 +151,9 @@ def add_grade():
     grade = input('Enter the grade: ') # letter grade 
     mark = input('Enter mark: ') # integer percentage
     return id.strip(), grade.strip(), int(mark.strip())
+
+if __name__ == "__main__":
+    email_address = input("Enter your email_address: ")
+    password = getpass.getpass("Enter your password: ")
+    login = LoginUser(email_address.strip(),password.strip())
+    login.login()
