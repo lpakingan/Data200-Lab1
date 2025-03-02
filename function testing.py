@@ -1,3 +1,21 @@
+# from LoginUser
+# old functionality for array storage
+def login(self):
+        '''checks the login details of the current user and logs them in if correct'''
+        with open('login.csv', newline = '') as csvfile:
+            logins = csv.reader(csvfile)
+            next(logins)
+            login_data = [login for login in logins]
+        
+        for login in login_data:
+            if self.email_address == login[0]:
+                print("You are now logged in!") if self.password == login[1] else print("Wrong password!")
+            else:
+                print("Email does not exist!")
+                
+        # insert code for encrypting/decrypting password
+
+
 # from Student
 # old functionality for dictionary storage that were replaced w/ linked list functions
 def get_students(self):

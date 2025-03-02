@@ -7,18 +7,37 @@ class LoginUser:
         self.email_address = email_address
         self.password = password
 
-    def login(self):
-        '''checks the login details of the current user and logs them in if correct'''
+    def get_logins(self):
+        login_data = LinkedList()
         with open('login.csv', newline = '') as csvfile:
             logins = csv.reader(csvfile)
             next(logins)
-            login_data = [login for login in logins]
-        
-        for login in login_data:
-            if self.email_address == login[0]:
-                print("You are now logged in!") if self.password == login[1] else print("Wrong password!")
-            else:
-                print("Email does not exist!")
+            for login in logins:
+                login_data.add_new(login)
+            return login_data
+
+    def login(self):
+        '''checks the login details of the current user and logs them in if correct'''
+        logins = self.get_logins()
+        login_exists = False
+        if logins.check_head():
+            c1 = logins.head
+            while c1 is not None:
+                if c1.data[0] == self.email_address:
+                    if c1.data[1] == self.password:
+                        print("You are now logged in!")
+                        login_exists = True
+                        break
+                    else:
+                        print("Incorrect password!")
+                        login_exists = True
+                        break
+                else: 
+                    print('Checking next...')
+                    c1 = c1.next
+
+        if not login_exists:
+            print('The email address is not associated with an account!')
                 
         # insert code for encrypting/decrypting password
 
@@ -46,7 +65,6 @@ class Student:
         self.grades = [] # has-many variable; calls from Grade
     
     def get_students(self):
-        student_data = {}
         # linked list method
         student_data = LinkedList()
         with open('student.csv', newline = '') as csvfile:
