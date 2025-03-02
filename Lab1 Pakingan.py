@@ -47,28 +47,46 @@ class Student:
     
     def get_students(self):
         student_data = {}
+        # linked list method
+        student_data = LinkedList()
         with open('student.csv', newline = '') as csvfile:
             students = csv.reader(csvfile)
             next(students)
             for student in students:
-                student_info = [student[1], student[2], student[3], student[4], student[5]]
-                student_data[student[0]] = student_info
+                student_data.add_new(student)
             return student_data
 
     def display_records(self):
         '''displays student records'''
+        # linked list method
         students = self.get_students()
-        for student in students:
-            print(f'''
-                Name: {students[student][0]} {students[student][1]}
-                Email: {student}
-                Courses: {students[student][2]}
-                Grade: {students[student][3]}
-                Mark: {students[student][4]}
-                ''')
+        students.print()
     
     def add_new_student(self, student): # student from add_student()
         '''add a new student into the system'''
+        # linked list method
+        students = self.get_students()
+        student_info = [student.email_address, student.first_name, student.last_name, None, None, None]
+        student_exists = False
+        if students.check_head():
+            c1 = students.head
+            while c1 is not None:
+                if c1.data[0] != student.email_address:
+                    c1 = c1.next
+                    print('Checking next...')
+                else: 
+                    print('Student already exists!')
+                    student_exists = True
+                    break
+        else:
+            students.add_first(student_info)
+            print('New student successfully added! (First student added)')
+            students.print()
+
+        if not student_exists:
+            students.add_new(student_info)
+            print('New student successfully added! (Another student added)')
+            students.print()
 
     def delete_student(self, email_address):
         '''delete a student in the system using their email address'''
@@ -142,6 +160,100 @@ class Grades:
     def modify_grade(self, id):
         '''change a grade using its id'''
 
+class Node:
+    def __init__(self, data):
+        self.data = data 
+        self.next = None 
+
+class LinkedList:
+    '''linked list class that allows for efficient insertion/deletion/sorting of data'''
+    def __init__(self):
+        self.head = None
+    
+    def check_head(self):
+        return True if self.head is not None else False
+    
+    def add_first(self, data):
+        '''add first node if linked list is empty'''
+        if self.head is None: 
+            self.head = Node(data)
+        else:
+            c1 = self.head 
+            self.head = Node(data) 
+            self.head.next = c1 
+
+    def add_new(self, data):
+        '''add node at last position'''
+        if self.head is None:
+            self.head = Node(data)
+        else:
+            c1 = self.head
+            while c1.next is not None:
+                c1 = c1.next 
+            c1.next = Node(data) 
+
+    def print(self):
+        '''print the  linked list'''
+        if self.check_head(): 
+           c1 = self.head
+        if self.head is not None:
+            c1 = self.head
+            while c1 is not None:
+                print(c1.data)
+                c1 = c1.next 
+
+    def size(self):
+        '''get the size of linked list'''
+        count=0
+        c1 = self.head
+        while c1:
+            c1 = c1.next
+            count = count + 1
+        
+        print("The linked list size is", count)
+
+    def add_at_index(self, data, newdata):
+        '''add node at a specific index'''
+        flag = False
+        if self.check_head(): 
+            c1 = self.head 
+            while c1 is not None: 
+                if c1.data == data: 
+                    print(f'Adding new node with data of {newdata} at node {data}...')
+                    nn = Node(newdata) 
+                    nn.next = c1.next 
+                    c1.next = nn 
+                    flag = True 
+                    break
+                else: 
+                    c1 = c1.next
+            
+        else:
+            print("List is empty!")
+
+        if not flag:
+            print("No data element found in the linked list!")
+
+
+    def delete_node(self, data):
+        '''delete the linked list's node with specific data'''
+        flag = False
+        if self.check_head(): 
+            c1 = self.head 
+            while c1 is not None: 
+                if c1.data == data: 
+                    print(f'Deleting node with data of {data}... \n')
+                    current.next = c1.next
+                    flag = True 
+                    break
+                current = c1
+                c1 = c1.next
+        else:
+            print("List is empty!")
+
+        if not flag:
+            print("No data element found in the linked list!")
+
 
 # HELPER FUNCTIONS
 def add_student():
@@ -183,3 +295,8 @@ if __name__ == "__main__":
     # displaying student records
     records = Student(first_name = None, last_name = None, email_address = None)
     records.display_records()
+
+    # adding new student
+    first_name, last_name, email_address = add_student()
+    new_student = Student(first_name, last_name, email_address)
+    new_student.add_new_student(new_student)
