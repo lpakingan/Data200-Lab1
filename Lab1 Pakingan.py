@@ -44,22 +44,25 @@ class Student:
         self.marks = [] # has-many variable; calls from Grade
         self.course_ids = [] # has-many variable; calls from Course
         self.grades = [] # has-many variable; calls from Grade
+    
+    def get_students(self):
+        with open('student.csv', newline = '') as csvfile:
+            students = csv.reader(csvfile)
+            next(students)
+            student_data = [student for student in students]
+            return student_data
 
     def display_records(self):
         '''displays student records'''
-    with open('student.csv', newline = '') as csvfile:
-        students = csv.reader(csvfile)
-        next(students)
-        student_data = [student for student in students]
-        
-    for student in student_data:
-        print(f'''
-              Name: {student[1]} {student[2]}
-              Email: {student[0]}
-              Courses: {student[3]}
-              Grade: {student[4]}
-              Mark: {student[5]}
-              ''')
+        students = self.get_students()
+        for student in students:
+            print(f'''
+                Name: {student[1]} {student[2]}
+                Email: {student[0]}
+                Courses: {student[3]}
+                Grade: {student[4]}
+                Mark: {student[5]}
+                ''')
     
     def add_new_student(self, student): # student from add_student()
         '''add a new student into the system'''
