@@ -46,10 +46,13 @@ class Student:
         self.grades = [] # has-many variable; calls from Grade
     
     def get_students(self):
+        student_data = {}
         with open('student.csv', newline = '') as csvfile:
             students = csv.reader(csvfile)
             next(students)
-            student_data = [student for student in students]
+            for student in students:
+                student_info = [student[1], student[2], student[3], student[4], student[5]]
+                student_data[student[0]] = student_info
             return student_data
 
     def display_records(self):
@@ -57,16 +60,16 @@ class Student:
         students = self.get_students()
         for student in students:
             print(f'''
-                Name: {student[1]} {student[2]}
-                Email: {student[0]}
-                Courses: {student[3]}
-                Grade: {student[4]}
-                Mark: {student[5]}
+                Name: {students[student][0]} {students[student][1]}
+                Email: {student}
+                Courses: {students[student][2]}
+                Grade: {students[student][3]}
+                Mark: {students[student][4]}
                 ''')
     
     def add_new_student(self, student): # student from add_student()
         '''add a new student into the system'''
-    
+
     def delete_student(self, email_address):
         '''delete a student in the system using their email address'''
 
