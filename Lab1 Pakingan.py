@@ -80,12 +80,14 @@ class Student:
                     break
         else:
             students.add_first(student_info)
-            print('New student successfully added! (First student added)')
+            write_to_file('student.csv', student_info)
+            print(f'{student.first_name} {student.last_name} successfully added! (First student added)')
             students.print()
 
         if not student_exists:
             students.add_new(student_info)
-            print('New student successfully added! (Another student added)')
+            write_to_file('student.csv', student_info)
+            print(f'{student.first_name} {student.last_name} successfully added! (Another student added)')
             students.print()
 
     def delete_student(self, email_address):
@@ -283,6 +285,11 @@ def add_grade():
     grade = input('Enter the grade: ') # letter grade 
     mark = input('Enter mark: ') # integer percentage
     return id.strip(), grade.strip(), int(mark.strip())
+
+def write_to_file(file, data): 
+    with open(file, 'a', newline = '') as writingfile:
+        writer = csv.writer(writingfile)
+        writer.writerow(data)
 
 if __name__ == "__main__":
 
