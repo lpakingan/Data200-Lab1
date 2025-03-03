@@ -98,18 +98,46 @@ class Student:
                     break
         else:
             students.add_first(student_info)
-            write_to_file('student.csv', student_info)
+            add_to_file('student.csv', student_info)
             print(f'{student.first_name} {student.last_name} successfully added! (First student added)')
             students.print()
 
         if not student_exists:
             students.add_new(student_info)
-            write_to_file('student.csv', student_info)
+            add_to_file('student.csv', student_info)
             print(f'{student.first_name} {student.last_name} successfully added! (Another student added)')
             students.print()
 
     def delete_student(self, email_address):
         '''delete a student in the system using their email address'''
+        students = self.get_students()
+        student_exists = False
+        prev_student = None
+        if students.check_head():
+            c1 = students.head
+            while c1 is not None:
+                if c1.data[0] == email_address:
+                    print(f'Deleting {c1.data[1]} {c1.data[2]} from the system...')
+                    if prev_student is None: # checking if first node; if so, move head to the next node
+                        student_exists = True
+                        students.head = c1.next
+                        # write_to_file('student.csv', students)
+                        students.print()
+                        break
+                    else: # if not first node, point previous node to the node after this one
+                        student_exists = True
+                        prev_student.next = c1.next
+                        # write_to_file('student.csv', students)
+                        students.print()
+                        break
+                prev_student = c1
+                c1 = c1.next
+
+        else:
+            print('No students in system!')
+
+        if not student_exists:
+            print('No student found with the entered email address!')
 
     def check_my_grades(self, email_address):
         '''checks a student's grades using their email address'''
@@ -304,10 +332,17 @@ def add_grade():
     mark = input('Enter mark: ') # integer percentage
     return id.strip(), grade.strip(), int(mark.strip())
 
-def write_to_file(file, data): 
+def add_to_file(file, data): 
+    '''add new line to given file with data'''
     with open(file, 'a', newline = '') as writingfile:
         writer = csv.writer(writingfile)
         writer.writerow(data)
+
+def write_to_file(file, data): 
+    '''rewrite to given file with data'''
+    with open(file, 'w', newline = '') as writingfile:
+        writer = csv.writer(writingfile)
+        writer.writerows(data)
 
 if __name__ == "__main__":
 
@@ -325,3 +360,8 @@ if __name__ == "__main__":
     first_name, last_name, email_address = add_student()
     new_student = Student(first_name, last_name, email_address)
     new_student.add_new_student(new_student)
+
+    # deleting student
+    email_address = input('Enter the email address of the student to be deleted: ')
+    delete_student = Student(first_name = None, last_name = None, email_address = None)
+    delete_student.delete_student(email_address)
