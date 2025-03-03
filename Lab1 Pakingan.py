@@ -69,21 +69,29 @@ class Student:
         student_data = LinkedList()
         with open('student.csv', newline = '') as csvfile:
             students = csv.reader(csvfile)
-            next(students)
+            header = next(students)
             for student in students:
                 student_data.add_new(student)
-            return student_data
+
+        # array method
+        student_list = []
+        c1 = student_data.head
+        while c1:
+            student_list.append(c1.data)
+            c1 = c1.next
+        
+        return student_data, student_list, header
 
     def display_records(self):
         '''displays student records'''
         # linked list method
-        students = self.get_students()
+        students = self.get_students()[0]
         students.print()
     
     def add_new_student(self, student): # student from add_student()
         '''add a new student into the system'''
         # linked list method
-        students = self.get_students()
+        students = self.get_students()[0]
         student_info = [student.email_address, student.first_name, student.last_name, None, None, None]
         student_exists = False
         if students.check_head():
@@ -110,7 +118,7 @@ class Student:
 
     def delete_student(self, email_address):
         '''delete a student in the system using their email address'''
-        students = self.get_students()
+        students, student_list, header = self.get_students()
         student_exists = False
         prev_student = None
         if students.check_head():
@@ -121,14 +129,12 @@ class Student:
                     if prev_student is None: # checking if first node; if so, move head to the next node
                         student_exists = True
                         students.head = c1.next
-                        # write_to_file('student.csv', students)
-                        students.print()
+                        write_to_file_ll('student.csv', header, students)
                         break
                     else: # if not first node, point previous node to the node after this one
                         student_exists = True
                         prev_student.next = c1.next
-                        # write_to_file('student.csv', students)
-                        students.print()
+                        write_to_file_ll('student.csv', header, students)
                         break
                 prev_student = c1
                 c1 = c1.next
@@ -138,6 +144,8 @@ class Student:
 
         if not student_exists:
             print('No student found with the entered email address!')
+        else:
+            students.print()
 
     def check_my_grades(self, email_address):
         '''checks a student's grades using their email address'''
@@ -338,11 +346,18 @@ def add_to_file(file, data):
         writer = csv.writer(writingfile)
         writer.writerow(data)
 
-def write_to_file(file, data): 
+def write_to_file_ll(file, header, data): 
     '''rewrite to given file with data'''
+    formatted_data = []
+    formatted_data.append(header)
+    c1 = data.head
+    while c1:
+        formatted_data.append(c1.data)
+        c1 = c1.next
+
     with open(file, 'w', newline = '') as writingfile:
         writer = csv.writer(writingfile)
-        writer.writerows(data)
+        writer.writerows(formatted_data)
 
 if __name__ == "__main__":
 
