@@ -84,10 +84,11 @@ class Student:
         
         return student_ll, student_list, header
 
-    def display_records(self):
+    @staticmethod
+    def display_records():
         '''displays student records'''
         # linked list method
-        students_ll = self.get_students()[0]
+        students_ll = Student.get_students()[0]
         students_ll.print()
     
     def add_new_student(self, student): # student from add_student()
@@ -186,9 +187,31 @@ class Course:
         self.credits = credits
         self.course_name = course_name
         self.course_description = course_description
+    
+    @staticmethod # static to call outside of course object
+    def get_courses():
+        # linked list method
+        course_ll = LinkedList()
+        with open('course.csv', newline = '') as csvfile:
+            courses = csv.reader(csvfile)
+            header = next(courses)
+            for course in courses:
+                course_ll.add_new(course)
 
-    def display_courses(self):
+        # array method
+        course_list = []
+        c1 = course_ll.head
+        while c1:
+            course_list.append(c1.data)
+            c1 = c1.next
+        
+        return course_ll, course_list, header
+
+    @staticmethod # static to call out of course object
+    def display_courses():
         '''displays all courses'''
+        courses_ll = Course.get_courses()[0]
+        courses_ll.print()
 
     def add_new_course(self, course): # course from add_course()
         '''add a new course'''
@@ -400,16 +423,16 @@ def write_to_file_ll(file, header, data):
         writer.writerows(formatted_data)
 
 if __name__ == "__main__":
-
+    ####### LOGINUSER
     # logging in
     email_address = input("Enter your email_address: ")
     password = getpass.getpass("Enter your password: ")
     login = LoginUser(email_address.strip(),password.strip())
     login.login()
 
+    ####### STUDENT
     # displaying student records
-    records = Student(first_name = None, last_name = None, email_address = None)
-    records.display_records()
+    Student.display_records()
 
     # adding new student
     first_name, last_name, email_address = add_student()
@@ -426,3 +449,8 @@ if __name__ == "__main__":
     current_student.check_my_grades()
     current_student.check_my_marks()
     current_student.update_student_record('B', '85')
+
+    ####### COURSES
+    # displaying courses
+    Course.display_courses()
+    
