@@ -123,33 +123,11 @@ class Student:
         '''delete a student in the system using their email address'''
         # linked list method
         students_ll, student_list, header = self.get_students()
-        student_exists = False
-        prev_student = None
-        if students_ll.check_head():
-            c1 = students_ll.head
-            while c1 is not None:
-                if c1.data[0] == email_address:
-                    print(f'Deleting {c1.data[1]} {c1.data[2]} from the system...')
-                    if prev_student is None: # checking if first node; if so, move head to the next node
-                        student_exists = True
-                        students_ll.head = c1.next
-                        write_to_file_ll('student.csv', header, students_ll)
-                        break
-                    else: # if not first node, point previous node to the node after this one
-                        student_exists = True
-                        prev_student.next = c1.next
-                        write_to_file_ll('student.csv', header, students_ll)
-                        break
-                prev_student = c1
-                c1 = c1.next
-
-        else:
-            print('No students in system!')
-
-        if not student_exists:
-            print('No student found with the entered email address!')
-        else:
-            students_ll.print()
+        try:
+            students_ll.delete_node(email_address)
+            write_to_file_ll('student.csv', header, students_ll)
+        except Exception as e:
+            print(f'Error deleting student: {e}!')
 
     def check_my_grades(self):
         '''lets student check their own grades'''
@@ -243,33 +221,11 @@ class Course:
     def delete_course(self, id):
         '''delete a course using its id'''
         courses_ll, course_list, header = self.get_courses()
-        course_exists = False
-        prev_course = None
-        if courses_ll.check_head():
-            c1 = courses_ll.head
-            while c1 is not None:
-                if c1.data[0] == id:
-                    print(f'Deleting {c1.data[0]} from the system...')
-                    if prev_course is None: 
-                        course_exists = True
-                        courses_ll.head = c1.next
-                        write_to_file_ll('course.csv', header, courses_ll)
-                        break
-                    else: 
-                        course_exists = True
-                        prev_course.next = c1.next
-                        write_to_file_ll('course.csv', header, courses_ll)
-                        break
-                prev_course = c1
-                c1 = c1.next
-
-        else:
-            print('No courses in system!')
-
-        if not course_exists:
-            print('No course found with the entered course id')
-        else:
-            courses_ll.print()
+        try:
+            courses_ll.delete_node(id)
+            write_to_file_ll('course.csv', header, courses_ll)
+        except Exception as e:
+            print(f'Error deleting student: {e}!')
     
 class Professor:
     '''professor class that includes information regarding a professor's name, email, rank'''
@@ -368,22 +324,27 @@ class LinkedList:
     def delete_node(self, data):
         '''delete the linked list's node with specific data'''
         flag = False
+        prev_node = None
         if self.check_head(): 
             c1 = self.head 
             while c1 is not None: 
-                if c1.data == data: 
-                    print(f'Deleting node with data of {data}... \n')
-                    current.next = c1.next
-                    flag = True 
-                    break
-                current = c1
+                if c1.data[0] == data: 
+                    print(f'Deleting {data}... \n')
+                    if prev_node is None: # checking if first node; if so, move head to the next node
+                        flag = True 
+                        self.head = c1.next
+                        break
+                    else: # if not first node, point previous node to the node after this one
+                        flag = True
+                        prev_node.next = c1.next
+                        break
+                prev_node = c1
                 c1 = c1.next
         else:
-            print("List is empty!")
+            print("There are currently no values to delete!")
 
         if not flag:
-            print("No data element found in the linked list!")
-
+            print(f"{data} was not found in the system!")
 
 # HELPER FUNCTIONS
 def add_student():
@@ -401,8 +362,9 @@ def get_student():
         if student[0] == email_address:
             current_student = Student(student[1], student[2], student[0], student[3], student[4], student[5])
             return current_student
-        else:
-            print('No student found with the email!')
+    else:
+        print('No student found with the email!')
+        return None
 
 def add_course():
     '''gets course details for add_new_course()'''
@@ -444,6 +406,7 @@ def write_to_file_ll(file, header, data):
     formatted_data = []
     formatted_data.append(header)
     c1 = data.head
+
     while c1:
         formatted_data.append(c1.data)
         c1 = c1.next
