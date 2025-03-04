@@ -65,38 +65,39 @@ class Student:
         self.grades = grades
         self.marks = marks
     
-    def get_students(self):
+    @staticmethod
+    def get_students():
         # linked list method
-        student_data = LinkedList()
+        student_ll = LinkedList()
         with open('student.csv', newline = '') as csvfile:
             students = csv.reader(csvfile)
             header = next(students)
             for student in students:
-                student_data.add_new(student)
+                student_ll.add_new(student)
 
         # array method
         student_list = []
-        c1 = student_data.head
+        c1 = student_ll.head
         while c1:
             student_list.append(c1.data)
             c1 = c1.next
         
-        return student_data, student_list, header
+        return student_ll, student_list, header
 
     def display_records(self):
         '''displays student records'''
         # linked list method
-        students = self.get_students()[0]
-        students.print()
+        students_ll = self.get_students()[0]
+        students_ll.print()
     
     def add_new_student(self, student): # student from add_student()
         '''add a new student into the system'''
         # linked list method
-        students = self.get_students()[0]
+        students_ll = self.get_students()[0]
         student_info = [student.email_address, student.first_name, student.last_name, None, None, None]
         student_exists = False
-        if students.check_head():
-            c1 = students.head
+        if students_ll.check_head():
+            c1 = students_ll.head
             while c1 is not None:
                 if c1.data[0] != student.email_address:
                     c1 = c1.next
@@ -106,37 +107,37 @@ class Student:
                     student_exists = True
                     break
         else:
-            students.add_first(student_info)
+            students_ll.add_first(student_info)
             add_to_file('student.csv', student_info)
             print(f'{student.first_name} {student.last_name} successfully added! (First student added)')
-            students.print()
+            students_ll.print()
 
         if not student_exists:
-            students.add_new(student_info)
+            students_ll.add_new(student_info)
             add_to_file('student.csv', student_info)
             print(f'{student.first_name} {student.last_name} successfully added! (Another student added)')
-            students.print()
+            students_ll.print()
 
     def delete_student(self, email_address):
         '''delete a student in the system using their email address'''
         # linked list method
-        students, student_list, header = self.get_students()
+        students_ll, student_list, header = self.get_students()
         student_exists = False
         prev_student = None
-        if students.check_head():
-            c1 = students.head
+        if students_ll.check_head():
+            c1 = students_ll.head
             while c1 is not None:
                 if c1.data[0] == email_address:
                     print(f'Deleting {c1.data[1]} {c1.data[2]} from the system...')
                     if prev_student is None: # checking if first node; if so, move head to the next node
                         student_exists = True
-                        students.head = c1.next
-                        write_to_file_ll('student.csv', header, students)
+                        students_ll.head = c1.next
+                        write_to_file_ll('student.csv', header, students_ll)
                         break
                     else: # if not first node, point previous node to the node after this one
                         student_exists = True
                         prev_student.next = c1.next
-                        write_to_file_ll('student.csv', header, students)
+                        write_to_file_ll('student.csv', header, students_ll)
                         break
                 prev_student = c1
                 c1 = c1.next
@@ -147,7 +148,7 @@ class Student:
         if not student_exists:
             print('No student found with the entered email address!')
         else:
-            students.print()
+            students_ll.print()
 
     def check_my_grades(self):
         '''lets student check their own grades'''
@@ -160,7 +161,7 @@ class Student:
     def update_student_record(self, new_grade, new_mark):
         '''updates a student's record by using their email address'''
         # array method
-        students, student_list, header = self.get_students()
+        students_ll, student_list, header = self.get_students()
         for student in student_list:
             if student[0] == self.email_address:
                 student[4] = new_grade 
@@ -340,6 +341,17 @@ def add_student():
     email_address = input('Enter email of student: ')
     return first_name.strip(), last_name.strip(), email_address.strip()
 
+def get_student():
+    '''get one student's details'''
+    student_list = Student.get_students()[1]
+    email_address = input('Enter the email of the student: ')
+    for student in student_list:
+        if student[0] == email_address:
+            current_student = Student(student[1], student[2], student[0], student[3], student[4], student[5])
+            return current_student
+        else:
+            print('No student found with the email!')
+
 def add_course():
     '''gets course details for add_new_course()'''
     course_id = input('Enter id of the course: ') # i.e. DATA200
@@ -410,7 +422,7 @@ if __name__ == "__main__":
     delete_student.delete_student(email_address)
 
     # student checking grades/marks and update
-    samantha = Student(first_name = 'Samantha', last_name = 'Mae', email_address = 'mae@myschool.edu', marks = 88, grades = 'B+', course_ids = 'DATA200')
-    samantha.check_my_grades()
-    samantha.check_my_marks()
-    samantha.update_student_record('A-', '91')
+    current_student = get_student()
+    current_student.check_my_grades()
+    current_student.check_my_marks()
+    current_student.update_student_record('B', '85')
