@@ -18,6 +18,7 @@ class LoginUser:
 
     def login(self):
         '''checks the login details of the current user and logs them in if correct'''
+        # linked list method
         logins = self.get_logins()
         login_exists = False
         if logins.check_head():
@@ -56,13 +57,13 @@ class LoginUser:
 
 class Student:
     '''student class that includes information regarding a student's name, email, grades/marks'''
-    def __init__(self, first_name, last_name, email_address):
+    def __init__(self, first_name, last_name, email_address, course_ids = None, grades = None, marks = None):
         self.first_name = first_name
         self.last_name = last_name
         self.email_address = email_address
-        self.marks = [] # has-many variable; calls from Grade
-        self.course_ids = [] # has-many variable; calls from Course
-        self.grades = [] # has-many variable; calls from Grade
+        self.course_ids = course_ids
+        self.grades = grades
+        self.marks = marks
     
     def get_students(self):
         # linked list method
@@ -118,6 +119,7 @@ class Student:
 
     def delete_student(self, email_address):
         '''delete a student in the system using their email address'''
+        # linked list method
         students, student_list, header = self.get_students()
         student_exists = False
         prev_student = None
@@ -147,15 +149,34 @@ class Student:
         else:
             students.print()
 
-    def check_my_grades(self, email_address):
-        '''checks a student's grades using their email address'''
+    def check_my_grades(self):
+        '''lets student check their own grades'''
+        # array method
+        student_list = self.get_students()[1]
+        for student in student_list:
+            if student[0] == self.email_address:
+                print(f"You currently have a {self.grades} in {self.course_ids}")
 
-    def update_student_record(self, email_address):
-        '''updates a student's record'''
+    def update_student_record(self, new_grade, new_mark):
+        '''updates a student's record by using their email address'''
+        # array method
+        students, student_list, header = self.get_students()
+        for student in student_list:
+            if student[0] == self.email_address:
+                student[4] = new_grade 
+                self.grades = new_grade
+                student[5] = new_mark 
+                self.marks = new_mark
+        write_to_file_array('student.csv', header, student_list)
+        print(f'The grade and mark for {self.first_name} {self.last_name} has been updated to {self.grades} ({self.marks}%)')
 
-    def check_my_marks(self, email_address):
-        '''checks a student's marks using their email address'''
-
+    def check_my_marks(self):
+        '''lets student check their own marks'''
+        # array method
+        student_list = self.get_students()[1]
+        for student in student_list:
+            if student[0] == self.email_address:
+                print(f"You currently have a mark of {self.marks}% in {self.course_ids}")
 
 class Course:
     '''course class that includes information regarding a course's id, credits, name'''
@@ -346,8 +367,15 @@ def add_to_file(file, data):
         writer = csv.writer(writingfile)
         writer.writerow(data)
 
+def write_to_file_array(file, header, data): 
+    '''rewrite to given file with data using array'''
+    with open(file, 'w', newline = '') as writingfile:
+        writer = csv.writer(writingfile)
+        writer.writerow(header)
+        writer.writerows(data)
+
 def write_to_file_ll(file, header, data): 
-    '''rewrite to given file with data'''
+    '''rewrite to given file with data using linked list'''
     formatted_data = []
     formatted_data.append(header)
     c1 = data.head
@@ -380,3 +408,9 @@ if __name__ == "__main__":
     email_address = input('Enter the email address of the student to be deleted: ')
     delete_student = Student(first_name = None, last_name = None, email_address = None)
     delete_student.delete_student(email_address)
+
+    # student checking grades/marks and update
+    samantha = Student(first_name = 'Samantha', last_name = 'Mae', email_address = 'mae@myschool.edu', marks = 88, grades = 'B+', course_ids = 'DATA200')
+    samantha.check_my_grades()
+    samantha.check_my_marks()
+    samantha.update_student_record('A-', '91')
