@@ -215,9 +215,61 @@ class Course:
 
     def add_new_course(self, course): # course from add_course()
         '''add a new course'''
+        courses_ll = Course.get_courses()[0]
+        course_info = [course.course_id, course.credits, course.course_name, course.course_description]
+        course_exists = False
+        if courses_ll.check_head():
+            c1 = courses_ll.head
+            while c1 is not None:
+                if c1.data[0] != course.course_id:
+                    c1 = c1.next
+                    print('Checking next...')
+                else: 
+                    print('Course already exists!')
+                    course_exists = True
+                    break
+        else:
+            courses_ll.add_first(course_info)
+            add_to_file('course.csv', course_info)
+            print(f'{course.course_id} successfully added! (First course added)')
+            courses_ll.print()
+
+        if not course_exists:
+            courses_ll.add_new(course_info)
+            add_to_file('course.csv', course_info)
+            print(f'{course.course_id} successfully added! (Another course added)')
+            courses_ll.print()
 
     def delete_course(self, id):
         '''delete a course using its id'''
+        courses_ll, course_list, header = self.get_courses()
+        course_exists = False
+        prev_course = None
+        if courses_ll.check_head():
+            c1 = courses_ll.head
+            while c1 is not None:
+                if c1.data[0] == id:
+                    print(f'Deleting {c1.data[0]} from the system...')
+                    if prev_course is None: 
+                        course_exists = True
+                        courses_ll.head = c1.next
+                        write_to_file_ll('course.csv', header, courses_ll)
+                        break
+                    else: 
+                        course_exists = True
+                        prev_course.next = c1.next
+                        write_to_file_ll('course.csv', header, courses_ll)
+                        break
+                prev_course = c1
+                c1 = c1.next
+
+        else:
+            print('No courses in system!')
+
+        if not course_exists:
+            print('No course found with the entered course id')
+        else:
+            courses_ll.print()
     
 class Professor:
     '''professor class that includes information regarding a professor's name, email, rank'''
@@ -313,29 +365,6 @@ class LinkedList:
         
         print("The linked list size is", count)
 
-    def add_at_index(self, data, newdata):
-        '''add node at a specific index'''
-        flag = False
-        if self.check_head(): 
-            c1 = self.head 
-            while c1 is not None: 
-                if c1.data == data: 
-                    print(f'Adding new node with data of {newdata} at node {data}...')
-                    nn = Node(newdata) 
-                    nn.next = c1.next 
-                    c1.next = nn 
-                    flag = True 
-                    break
-                else: 
-                    c1 = c1.next
-            
-        else:
-            print("List is empty!")
-
-        if not flag:
-            print("No data element found in the linked list!")
-
-
     def delete_node(self, data):
         '''delete the linked list's node with specific data'''
         flag = False
@@ -380,7 +409,8 @@ def add_course():
     course_id = input('Enter id of the course: ') # i.e. DATA200
     credits = input('Enter the number of credits of the course: ')
     course_name = input('Enter the name of the course: ')
-    return course_id.strip(), int(credits.strip()), course_name.strip()
+    course_description = input('Enter the description of the course: ')
+    return course_id.strip(), int(credits.strip()), course_name.strip(), course_description.strip()
 
 def add_professor():
     '''gets professor details for add_new_professor()'''
@@ -453,4 +483,15 @@ if __name__ == "__main__":
     ####### COURSES
     # displaying courses
     Course.display_courses()
+
+    # adding new course
+    course_id, course_name, course_credits, course_description = add_course()
+    new_course = Course(course_id, course_credits, course_name, course_description)
+    new_course.add_new_course(new_course)
+
+    # deleting course
+    course_id = input('Enter the course id to be deleted: ')
+    delete_course = Course(course_id = None, credits = None, course_name = None, course_description = None)
+    delete_course.delete_course(course_id)
+
     
