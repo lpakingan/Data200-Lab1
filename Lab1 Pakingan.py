@@ -229,17 +229,63 @@ class Course:
     
 class Professor:
     '''professor class that includes information regarding a professor's name, email, rank'''
-    def __init__(self, name, email_address, rank):
+    def __init__(self, email_address, name, rank, course_id):
         self.name = name
         self.email_address = email_address
         self.rank = rank
-        self.course_id = '' # has-a variable; differs for each professor instance
+        self.course_id = course_id
 
-    def professors_details(self):
+    @staticmethod
+    def get_professors():
+        # linked list method
+        professor_ll = LinkedList()
+        with open('professor.csv', newline = '') as csvfile:
+            professors = csv.reader(csvfile)
+            header = next(professors)
+            for professor in professors:
+                professor_ll.add_new(professor)
+
+        # array method
+        professor_list = []
+        c1 = professor_ll.head
+        while c1:
+            professor_list.append(c1.data)
+            c1 = c1.next
+        
+        return professor_ll, professor_list, header
+
+    @staticmethod
+    def professors_details():
         '''displays all professors'''
+        professors_ll = Professor.get_professors()[0]
+        professors_ll.print()
 
-    def add_new_professor(self, email_address): # professor from add_professor()
+    def add_new_professor(self, professor): # professor from add_professor()
         '''add a new professor into the system'''
+        professors_ll = Professor.get_professors()[0]
+        professor_info = [professor.email_address, professor.name, professor.rank, professor.course_id]
+        professor_exists = False
+        if professors_ll.check_head():
+            c1 = professors_ll.head
+            while c1 is not None:
+                if c1.data[0] != professor.email_address:
+                    c1 = c1.next
+                    print('Checking next...')
+                else: 
+                    print('Professor already exists!')
+                    professor_exists = True
+                    break
+        else:
+            professors_ll.add_first(professor_info)
+            add_to_file('professor.csv', professor_info)
+            print(f'{professor.name} successfully added! (First professor added)')
+            professors_ll.print()
+
+        if not professor_exists:
+            professors_ll.add_new(professor_info)
+            add_to_file('professor.csv', professor_info)
+            print(f'{professor.name} successfully added! (Another professor added)')
+            professors_ll.print()
     
     def delete_professor(self, email_address):
         '''delete a professor using their email address'''
@@ -379,7 +425,8 @@ def add_professor():
     name = input('Enter the name of the professor: ')
     email_address = input('Enter the email of the professor: ')
     rank = input('Enter the rank of the professor: ')
-    return name.strip(), email_address.strip(), int(rank.strip())
+    course_id = input('Enter the course id of the course the professor teaches: ')
+    return email_address.strip(), name.strip(), rank.strip(), course_id.strip()
 
 def add_grade():
     '''gets grade details for add_new_grade()'''
@@ -457,4 +504,12 @@ if __name__ == "__main__":
     delete_course = Course(course_id = None, credits = None, course_name = None, course_description = None)
     delete_course.delete_course(course_id)
 
+    ####### PROFESSORS
+    # displaying professors
+    Professor.professors_details()
+
+    # adding new professor
+    email_address, name, rank, course_id = add_professor()
+    new_professor = Professor(email_address, name, rank, course_id)
+    new_professor.add_new_professor(new_professor)
     
