@@ -1,10 +1,10 @@
 ﻿student_id,first_name,last_name,course_ids,grades,marks
-mae@myschool.edu,Samantha,Mae,DATA200,B+,88
-russell@myschool.edu,Sally,Russell,DATA200,A-,91
+mae@myschool.edu,Samantha,Mae,DATA200,B-,80
+russell@myschool.edu,Sally,Russell,DATA200,A-,90
 doe@myschool.edu,John,Doe,DATA201,A,95
 smith@myschool.edu,Jane,Smith,DATA202,B+,88
 jones@myschool.edu,Emily,Jones,DATA203,A-,92
-brown@myschool.edu,Michael,Brown,DATA204,B,85
+brown@myschool.e`du,Michael,Brown,DATA204,B,85
 davis@myschool.edu,Sarah,Davis,DATA203,A,97
 miller@myschool.edu,William,Miller,DATA201,C-,72
 wilson@myschool.edu,Lucy,Wilson,DATA202,B-,80
