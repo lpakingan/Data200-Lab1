@@ -1,3 +1,5 @@
 ﻿course_id,course_name,credits,description
 DATA200,Intro to Data Science,3,Utilizing Python in Data Science
 DATA201,Intro to Databases,3,Utilizing SQL in Data Science
+DATA202,Advanced Data Science,4,Involved data science algorithms and calculations
+DATA203,Advanced Database Techniques,3,Learn about advanced SQL queries and processing pipelines

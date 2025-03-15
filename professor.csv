@@ -1,3 +1,5 @@
 ﻿professor_id,professor_name,rank,course_id
-smith@myschool.edu,John Smith,Tenured Lecturer,DATA200
+smith@myschool.edu,John Smith,Tenured Scholar,DATA200
 douglas@myschool.edu,Ken Douglas,Visiting Lecturer,DATA201
+roberts@myschool.edu,Dave Roberts,Visiting Scholar,DATA203
+gomez@myschool.edu,Kerry Gomez,Adjunct Lecturer,DATA202
