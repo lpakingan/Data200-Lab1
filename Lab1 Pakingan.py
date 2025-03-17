@@ -40,7 +40,6 @@ class LoginUser:
                         login_exists = True
                         return False, None, None
                 else: 
-                    print('Checking next...')
                     c1 = c1.next
 
         if not login_exists:
@@ -304,18 +303,19 @@ class Professor:
         '''show a professor's course using their email address'''
         professor_list = get_data('professor.csv')[1]
         course_list = get_data('course.csv')[1]
-        for professor in professor_list:
-            if professor[0] == self.email_address:
-                for course in course_list:
-                    if professor[3] == course[0]:
-                        print(f'''
-                              Showing course details for {professor[1]}:
-                              ID: {course[0]}
-                              Name: {course[1]}
-                              Credits: {course[2]}
-                              Description: {course[3]}
-                              '''
-                        )
+        if self.email_address:
+            for professor in professor_list:
+                if professor[0] == self.email_address:
+                    for course in course_list:
+                        if professor[3] == course[0]:
+                            print(f'''
+                                Showing course details for {professor[1]}:
+                                ID: {course[0]}
+                                Name: {course[1]}
+                                Credits: {course[2]}
+                                Description: {course[3]}
+                                '''
+                            )
 
 class Grades:
     '''grades class that includes information regarding a specific grade for a student'''
@@ -709,6 +709,7 @@ def write_to_file_ll(file, header, data):
 def checkmygrade_main_menu():
     while True:
         columns = shutil.get_terminal_size().columns
+        print(__file__)
         print('================================='.center(columns))
         print('Welcome to CheckMyGrade'.center(columns))
         print('================================'.center(columns))
@@ -727,6 +728,7 @@ def checkmygrade_main_menu():
                 if role == 'student':
                     current_student = get_student(current_user.email_address)
                     while True:
+                        print(__file__)
                         print('================================='.center(columns))
                         msg='''Welcome to CheckMyGrade'''
                         print(msg.center(columns))
@@ -764,6 +766,7 @@ def checkmygrade_main_menu():
                 elif role == 'professor':
                     current_professor = get_professor(current_user.email_address)
                     while True:
+                        print(__file__)
                         print('================================='.center(columns))
                         msg='''Welcome to CheckMyGrade'''
                         print(msg.center(columns))
@@ -814,111 +817,200 @@ def checkmygrade_main_menu():
                             print('Enter a valid choice!')
                 elif role == 'admin':
                     while True:
+                        print(__file__)
                         print('================================='.center(columns))
                         msg='''Welcome to CheckMyGrade'''
                         print(msg.center(columns))
                         msg2='''Admin Portal'''
                         print(msg2.center(columns))
                         print('================================'.center(columns))
-                        print('1. Display all students')
-                        print('2. Display all courses')
-                        print('3. Display all professors')
-                        print('4. Sort students')
-                        print('5. Search students')
-                        print('6. Add student')
-                        print('7. Delete student')
-                        print('8. Add course')
-                        print('9. Delete course')
-                        print('10. Add professor')
-                        print('11. Delete professor')
-                        print('12. Update professor rank')
-                        print('13. Logout')
+                        print('1. Show student options')
+                        print('2. Show professor options')
+                        print('3. Show course options')
+                        print('4. Logout')
                         choice = input('Enter what you would like to do: ')
                         if choice == '1':
-                            print('Retrieving all students...')
-                            Student.display_records()
-                        elif choice == '2':
-                            print('Retrieving all courses...')
-                            Course.display_courses()
-                        elif choice == '3':
-                            print('Retrieving all professors...')
-                            Professor.professors_details()
-                        elif choice == '4':
-                            print('Sort students...')
-                            sort_by = input('''How would you like to sort?
-                                            1. By student ID (email address) 
-                                            2. By student ID (email address) (reversed)
-                                            3. By grade
-                                            4. By grade (descending)
+                            student_screen = True
+                            while student_screen:
+                                print(__file__)
+                                print('================================='.center(columns))
+                                msg='''Welcome to CheckMyGrade'''
+                                print(msg.center(columns))
+                                msg2='''Admin Portal (Student Screen)'''
+                                print(msg2.center(columns))
+                                print('================================'.center(columns))
+                                print('1. Display all students')
+                                print('2. Sort students')
+                                print('3. Search students')
+                                print('4. Add student')
+                                print('5. Modify student grade/mark')
+                                print('6. Delete student')
+                                print('7. Go back')
+                                student_choice = input('Enter what you would like to do: ')
+                                if student_choice == '1':
+                                    print('Retrieving all students...')
+                                    Student.display_records()
+                                elif student_choice == '2':
+                                    print('Sort students...')
+                                    sort_by = input('''How would you like to sort?
+                                                    1. By student ID (email address) 
+                                                    2. By student ID (email address) (reversed)
+                                                    3. By grade
+                                                    4. By grade (descending)
+                                                    ''')
+                                    if sort_by == '1':
+                                        Student.sort_students('email', 'default')
+                                    elif sort_by == '2':
+                                        Student.sort_students('email', 'reverse')
+                                    elif sort_by == '3':
+                                        Student.sort_students('grade', 'default')
+                                    elif sort_by == '4':
+                                        Student.sort_students('grade', 'reverse')
+                                    else:
+                                        print('Incorrect input for sorting!')
+                                elif student_choice == '3':
+                                    print('Search for student...')
+                                    student_id = input('Enter student email: ')
+                                    searched_student = get_student(student_id)
+                                    if searched_student is not None:
+                                        print(f'Displaying information for {searched_student.first_name} {searched_student.last_name}')
+                                        print(f'''
+                                            Enrolled in: {searched_student.course_ids}
+                                            Grade in {searched_student.course_ids}: {searched_student.grades}
+                                            Mark: {searched_student.marks}
                                             ''')
-                            if sort_by == '1':
-                                Student.sort_students('email', 'default')
-                            elif sort_by == '2':
-                                Student.sort_students('email', 'reverse')
-                            elif sort_by == '3':
-                                Student.sort_students('grade', 'default')
-                            elif sort_by == '4':
-                                Student.sort_students('grade', 'reverse')
-                            else:
-                                print('Incorrect input for sorting!')
-                        elif choice == '5':
-                            print('Search for student...')
-                            student_id = input('Enter student email: ')
-                            searched_student = get_student(student_id)
-                            if searched_student is not None:
-                                print(f'Displaying information for {searched_student.first_name} {searched_student.last_name}')
-                                print(f'''
-                                    Enrolled in: {searched_student.course_ids}
-                                    Grade in {searched_student.course_ids}: {searched_student.grades}
-                                    Mark: {searched_student.marks}
-                                    ''')
-                                course_average = Grades.get_course_average(searched_student.course_ids)
-                                print(f'{searched_student.first_name} {searched_student.last_name} is currently above the course average ({course_average})') if int(searched_student.marks) >= course_average else print(f'{searched_student.first_name} {searched_student.last_name} is currently below the course average ({course_average})')
-                            else: 
-                                print('Invalid student email!')
-                        elif choice == '6':
-                            print('Adding student...')
-                            first_name, last_name, email_address, course_ids, grades, marks = add_student()
-                            new_student = Student(first_name, last_name, email_address, course_ids, grades, marks)
-                            new_student.add_new_student(new_student)
-                        elif choice == '7':
-                            print('Deleting student...')
-                            email_address = input('Enter the email address of the student to be deleted: ')
-                            delete_student = Student(first_name = None, last_name = None, email_address = None, course_ids = None, grades = None, marks = None)
-                            delete_student.delete_student(email_address)
-                        elif choice == '8':
-                            print('Adding course...')
-                            course_id, course_name, course_credits, course_description = add_course()
-                            new_course = Course(course_id, course_credits, course_name, course_description)
-                            if new_course:
-                                new_course.add_new_course(new_course)
-                            else:
-                                print('Issue adding course! Make sure you are entering the course details correctly.')
-                        elif choice == '9':
-                            print('Deleting course...')
-                            course_id = input('Enter the course id to be deleted: ')
-                            delete_course = Course(course_id = None, credits = None, course_name = None, course_description = None)
-                            delete_course.delete_course(course_id)
-                        elif choice == '10':
-                            print('Adding professor...')
-                            email_address, name, rank, course_id = add_professor()
-                            new_professor = Professor(email_address, name, rank, course_id)
-                            new_professor.add_new_professor(new_professor)
-                        elif choice == '11':
-                            print('Deleting professor...')
-                            email_address = input('Enter the email address of the professor to be deleted: ')
-                            delete_professor = Professor(email_address = None, name = None, rank = None, course_id = None)
-                            delete_professor.delete_professor(email_address)
-                        elif choice == '12':
-                            print('Update professor details...')
-                            email_address = input('Enter the email address of the professor you wish to modify: ')
-                            update_professor = get_professor(email_address)
-                            if update_professor:
-                                new_rank = input(f'Enter the new rank of {update_professor.name}')
-                                update_professor.modify_professor_details(new_rank)
-                            else:
-                                print('Professor not found! Make sure you entered their email correctly.')
-                        elif choice == '13':
+                                        course_average = Grades.get_course_average(searched_student.course_ids)
+                                        print(f'{searched_student.first_name} {searched_student.last_name} is currently above the course average ({course_average})') if int(searched_student.marks) >= course_average else print(f'{searched_student.first_name} {searched_student.last_name} is currently below the course average ({course_average})')
+                                elif student_choice == '4':
+                                    print('Adding student...')
+                                    first_name, last_name, email_address, course_ids, grades, marks = add_student()
+                                    new_student = Student(first_name, last_name, email_address, course_ids, grades, marks)
+                                    new_student.add_new_student(new_student)
+                                elif student_choice == '5':
+                                    print('Modifying student...')
+                                    student_email = input('Enter the email of the student you would like to edit: ')
+                                    update_student = get_student(student_email)
+                                    if update_student:
+                                        print(f'The current grade and mark for {update_student.first_name} {update_student.last_name} is {update_student.grades} ({update_student.marks}%)')
+                                        new_mark = input(f'Enter the new mark for {update_student.first_name} {update_student.last_name}: ')
+                                        if isinstance(int(new_mark), int):
+                                            if 0 <= int(new_mark) <= 100:
+                                                new_grade = input(f'Enter the new grade for {update_student.first_name} {update_student.last_name}: ')
+                                                update_student.update_student_record(new_grade, new_mark)
+                                            else:
+                                                print('New mark must be valid (between 0 to 100!)')
+                                        else:
+                                            print('Please enter a valid integer!')
+                                    else:
+                                        print('Please try again!')
+                                elif student_choice == '6':
+                                    print('Deleting student...')
+                                    email_address = input('Enter the email address of the student to be deleted: ')
+                                    delete_student = Student(first_name = None, last_name = None, email_address = None, course_ids = None, grades = None, marks = None)
+                                    delete_student.delete_student(email_address)
+                                elif student_choice == '7':
+                                    print('Returning to option screen...')
+                                    student_screen = False
+                                else:
+                                    print('Invalid choice!')
+                        elif choice == '2':
+                            professor_screen = True
+                            while professor_screen:
+                                print(__file__)
+                                print('================================='.center(columns))
+                                msg='''Welcome to CheckMyGrade'''
+                                print(msg.center(columns))
+                                msg2='''Admin Portal (Professor Screen)'''
+                                print(msg2.center(columns))
+                                print('================================'.center(columns))
+                                print('1. Display all professors')
+                                print('2. Search course details by professor')
+                                print('3. Get grade report for professor')
+                                print('4. Add professor')
+                                print('5. Modify professor')
+                                print('6. Delete professor')
+                                print('7. Go back')
+                                professor_choice = input('Enter what you would like to do: ')
+                                if professor_choice == '1':
+                                    print('Retrieving all professors...')
+                                    Professor.professors_details()
+                                elif professor_choice == '2':
+                                    professor_id = input('Enter email of the professor to get their course details: ')
+                                    current_professor = get_professor(professor_id)
+                                    if current_professor:
+                                        current_professor.show_course_details_by_professor()
+                                elif professor_choice == '3':
+                                    professor_id = input('Enter email of the professor to get their course grade report: ')
+                                    current_professor = get_professor(professor_id)
+                                    if current_professor:
+                                        Grades.display_grades_by_course(current_professor.course_id)
+                                        course_average = Grades.get_course_average(current_professor.course_id)
+                                        print(f"The average for {current_professor.name}'s course is {course_average}%")
+                                elif professor_choice == '4':
+                                    print('Adding professor...')
+                                    email_address, name, rank, course_id = add_professor()
+                                    new_professor = Professor(email_address, name, rank, course_id)
+                                    new_professor.add_new_professor(new_professor)
+                                elif professor_choice == '5':
+                                    print('Update professor details...')
+                                    email_address = input('Enter the email address of the professor you wish to modify: ')
+                                    update_professor = get_professor(email_address)
+                                    if update_professor:
+                                        new_rank = input(f'Enter the new rank of {update_professor.name}')
+                                        update_professor.modify_professor_details(new_rank)
+                                    else:
+                                        print('Professor not found! Make sure you entered their email correctly.')
+                                elif professor_choice == '6':
+                                    print('Deleting professor...')
+                                    email_address = input('Enter the email address of the professor to be deleted: ')
+                                    delete_professor = Professor(email_address = None, name = None, rank = None, course_id = None)
+                                    delete_professor.delete_professor(email_address)
+                                elif professor_choice == '7':
+                                    print('Returning to option screen...')
+                                    professor_screen = False
+                                else:
+                                    print('Invalid choice!')
+                        elif choice == '3':
+                            course_screen = True
+                            while course_screen:
+                                print(__file__)
+                                print('================================='.center(columns))
+                                msg='''Welcome to CheckMyGrade'''
+                                print(msg.center(columns))
+                                msg2='''Admin Portal (Course Screen)'''
+                                print(msg2.center(columns))
+                                print('================================'.center(columns))
+                                print('1. Display all courses')
+                                print('2. Get grade report for course')
+                                print('3. Add course')
+                                print('4. Delete course')
+                                print('5. Go back')
+                                course_choice = input('Enter what you would like to do: ')
+                                if course_choice == '1':
+                                    print('Retrieving all courses...')
+                                    Course.display_courses()
+                                elif course_choice == '2':
+                                    course_id = input('Enter the course id of the course you would like to get a grade report for: ')
+                                    Grades.display_grades_by_course(course_id)
+                                elif course_choice == '3':
+                                    print('Adding course...')
+                                    course_id, course_name, course_credits, course_description = add_course()
+                                    new_course = Course(course_id, course_credits, course_name, course_description)
+                                    if new_course:
+                                        new_course.add_new_course(new_course)
+                                    else:
+                                        print('Issue adding course! Make sure you are entering the course details correctly.')
+                                elif course_choice == '4':
+                                    print('Deleting course...')
+                                    course_id = input('Enter the course id to be deleted: ')
+                                    delete_course = Course(course_id = None, credits = None, course_name = None, course_description = None)
+                                    delete_course.delete_course(course_id)
+                                elif course_choice == '5':
+                                    print('Returning to option screen...')
+                                    course_screen = False
+                                else:
+                                    print('Invalid choice!')
+                        elif choice == '4':
                             print('Logging out...')
                             current_user.logout()
                             break
