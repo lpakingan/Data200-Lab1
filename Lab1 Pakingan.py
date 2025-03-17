@@ -177,10 +177,12 @@ class Student:
         for student in student_list:
             if student[0] == self.email_address:
                 print(f"You currently have a mark of {self.marks}% in {self.course_ids}")
+                print(f'Execution time: {time.time() - start_time} seconds')
 
     @staticmethod
     def sort_students(by, order):
         '''sorts students either by email or grade'''
+        start_time = time.time()
         student_list = get_data('student.csv')[1]
         sorted_list = sorted(student_list, key = lambda x: x[0]) if by == 'email' else sorted(student_list, key = lambda x: x[5])
         if order == 'reverse':
@@ -193,6 +195,7 @@ class Student:
                   Current grade for {student[3]}: {student[4]}
                   Mark: {student[5]}
                   ''')
+        print(f'Sorting time: {time.time() - start_time} seconds')
         
 class Course:
     '''course class that includes information regarding a course's id, credits, name'''
@@ -301,6 +304,7 @@ class Professor:
 
     def show_course_details_by_professor(self):
         '''show a professor's course using their email address'''
+        start_time = time.time()
         professor_list = get_data('professor.csv')[1]
         course_list = get_data('course.csv')[1]
         if self.email_address:
@@ -316,6 +320,7 @@ class Professor:
                                 Description: {course[3]}
                                 '''
                             )
+        print(f'Search time: {time.time() - start_time} seconds')
 
 class Grades:
     '''grades class that includes information regarding a specific grade for a student'''
@@ -341,6 +346,7 @@ class Grades:
 
     @staticmethod
     def display_grades_by_course(course):
+        start_time = time.time()
         grades = Grades.get_grades()
         course_grades = []
         for grade in grades:
@@ -348,7 +354,8 @@ class Grades:
                 course_grades.append(grade[2])
                 print(f'{grade[0]}: {grade[1]} ({grade[2]}%)')
         
-        print(f'There are {len(course_grades)} students in {course}.')
+        print(f'There are {len(course_grades)} students in {course}.\n')
+        print(f'Search time: {time.time() - start_time} seconds')
 
     @staticmethod
     def get_course_average(course):
@@ -629,10 +636,12 @@ def add_student():
 
 def get_student(email_address):
     '''get one student's details'''
+    start_time = time.time()
     student_list = get_data('student.csv')[1]
     for student in student_list:
         if student[0] == email_address:
             current_student = Student(student[1], student[2], student[0], student[3], student[4], student[5])
+            print(f'Search time: {time.time() - start_time} seconds')
             return current_student
     else:
         print('No student found with the email!')
@@ -640,10 +649,12 @@ def get_student(email_address):
 
 def get_professor(email_address):
     '''get one professor's details'''
+    start_time = time.time()
     professor_list = get_data('professor.csv')[1]
     for professor in professor_list:
         if professor[0] == email_address:
             current_professor = Professor(professor[0], professor[1], professor[2], professor[3])
+            print(f'Search time: {time.time() - start_time} seconds')
             return current_professor
     else:
         print('No professor found with the email!')
