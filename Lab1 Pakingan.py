@@ -33,7 +33,6 @@ class LoginUser:
                     encrypted_password = self.encrypt_password(self.password)
                     if encrypted_password == c1.data[1]:
                         print('You are now logged in!')
-                        print(f'{c1.data[0]}: {c1.data[1]}')
                         login_exists = True
                         return True, c1.data[0], c1.data[2]
                     else:
@@ -116,11 +115,15 @@ class Student:
         print('Displaying students...')
         students_list = get_data('student.csv')[1]
         for student in students_list:
+            course_list = student[3].split('|')
+            grades_list = student[4].split('|')
+            marks_list = student[5].split('|')
             print(f'''
                   {student[0]}
                   {student[1]} {student[2]}
-                  Course: {student[3]}
-                  Performance: {student[4]} ({student[5]}%)
+                  Course(s): {course_list}
+                  Grade(s): {grades_list}
+                  Mark(s): {marks_list}
                   ''')
     
     def add_new_student(self, student): # student from add_student()
@@ -158,7 +161,12 @@ class Student:
         student_list = get_data('student.csv')[1]
         for student in student_list:
             if student[0] == self.email_address:
-                print(f"You currently have a {self.grades} in {self.course_ids}")
+                course_list = self.course_ids.split('|')
+                print(f'{self.email_address} is currently taking {len(course_list)} courses.')
+                print('Showing grades...')
+                grades_list = self.grades.split('|')
+                for idx, course in enumerate(course_list):
+                    print(f"{course}: {grades_list[idx]}")
 
     def update_student_record(self, new_grade, new_mark):
         '''updates a student's record by using their email address'''
@@ -169,7 +177,7 @@ class Student:
                 student[4] = self.grades = new_grade 
                 student[5] = self.marks = new_mark 
         write_to_file_array('student.csv', header, student_list)
-        print(f'The grade and mark for {self.first_name} {self.last_name} has been updated to {self.grades} ({self.marks}%)')
+        print(f'The grade and mark for {self.first_name} {self.last_name} has been updated to {new_grade} ({new_mark}%)')
 
     def check_my_marks(self):
         '''lets student check their own marks'''
@@ -177,24 +185,25 @@ class Student:
         student_list = get_data('student.csv')[1]
         for student in student_list:
             if student[0] == self.email_address:
-                print(f"You currently have a mark of {self.marks}% in {self.course_ids}")
-                print(f'Execution time: {time.time() - start_time} seconds')
+                course_list = self.course_ids.split('|')
+                print(f'{self.email_address} is currently taking {len(course_list)} courses.')
+                print('Showing marks...')
+                marks_list = self.marks.split('|')
+                for idx, course in enumerate(course_list):
+                    print(f"{course}: {marks_list[idx]}%")
 
     @staticmethod
     def sort_students(by, order):
         '''sorts students either by email or grade'''
         start_time = time.time()
         student_list = get_data('student.csv')[1]
-        sorted_list = sorted(student_list, key = lambda x: x[0]) if by == 'email' else sorted(student_list, key = lambda x: x[5])
+        grades_list = Grades.get_grades()
+        sorted_list = sorted(student_list, key = lambda x: x[0]) if by == 'email' else sorted(grades_list, key = lambda x: x[2])
         if order == 'reverse':
             sorted_list = sorted_list[::-1]
-        for student in sorted_list:
+        for data in sorted_list:
             print(f'''
-                  {student[0]}
-                  {student[2]}, {student[1]}
-                  Enrolled in: {student[3]}
-                  Current grade for {student[3]}: {student[4]}
-                  Mark: {student[5]}
+                  {data}
                   ''')
         print(f'Sorting time: {time.time() - start_time} seconds')
         
@@ -332,8 +341,14 @@ class Grades:
 
     @staticmethod
     def get_grades():
-        student_grades = get_data('student.csv')[1]
-        grade_data = [[student_grades[student][0], student_grades[student][4], student_grades[student][5], student_grades[student][3]] for student in range(len(student_grades))]
+        students = get_data('student.csv')[1]
+        grade_data = []
+        for student in students:
+            student_courses = student[3].split('|')
+            student_grades = student[4].split('|')
+            student_marks = student[5].split('|')
+            for idx, course in enumerate(student_courses):
+                grade_data.append([student[0], student_grades[idx], student_marks[idx], course])
         return grade_data
     
     @staticmethod
@@ -772,19 +787,22 @@ def checkmygrade_main_menu():
                             current_student.check_my_marks()
                         elif choice == '3':
                             print('Getting information for comparison...')
-                            print(f'You current mark in {current_student.course_ids} is {current_student.marks}%')
-                            course_average = Grades.get_course_average(current_student.course_ids)
-                            print(f'The current course average is {course_average}%')
-                            course_median = Grades.get_course_median(current_student.course_ids)
-                            print(f'The current course median is {course_median}')
-                            print('Keep it up!') if int(current_student.marks) >= course_average else print('Keep your head up!') 
+                            course_ids = current_student.course_ids.split('|')
+                            marks = current_student.marks.split('|')
+                            for idx, course in enumerate(course_ids):
+                                print(f'Class {idx+1}: {course}')
+                                print(f'Your mark: {marks[idx]}%')
+                                course_average = Grades.get_course_average(course)
+                                print(f'Average: {course_average:1f}%')
+                                course_median = Grades.get_course_median(course)
+                                print(f'Median: {course_median}%')
                         elif choice == '4':
                             print('Changing your password...')
                             current_user.change_password()
                         elif choice == '5':
                             print('Logging out...')
                             current_user.logout()
-                            return False
+                            break
                         else:
                             print('Enter a valid choice!')
                 elif role == 'professor':
@@ -868,10 +886,11 @@ def checkmygrade_main_menu():
                                 print('1. Display all students')
                                 print('2. Sort students')
                                 print('3. Search students')
-                                print('4. Add student')
-                                print('5. Modify student grade/mark')
-                                print('6. Delete student')
-                                print('7. Go back')
+                                print('4. Get all grades')
+                                print('5. Add student')
+                                print('6. Modify student grade/mark')
+                                print('7. Delete student')
+                                print('8. Go back')
                                 student_choice = input('Enter what you would like to do: ')
                                 if student_choice == '1':
                                     print('Retrieving all students...')
@@ -899,43 +918,70 @@ def checkmygrade_main_menu():
                                     print('Search for student...')
                                     student_id = input('Enter student email: ')
                                     searched_student = get_student(student_id)
-                                    if searched_student is not None:
+                                    if searched_student:
                                         print(f'Displaying information for {searched_student.first_name} {searched_student.last_name}')
-                                        print(f'''
-                                            Enrolled in: {searched_student.course_ids}
-                                            Grade in {searched_student.course_ids}: {searched_student.grades}
-                                            Mark: {searched_student.marks}
-                                            ''')
-                                        course_average = Grades.get_course_average(searched_student.course_ids)
-                                        print(f'{searched_student.first_name} {searched_student.last_name} is currently above the course average ({course_average})') if int(searched_student.marks) >= course_average else print(f'{searched_student.first_name} {searched_student.last_name} is currently below the course average ({course_average})')
+                                        course_list = searched_student.course_ids.split('|')
+                                        print(f'{searched_student.email_address} is currently taking {len(course_list)} courses.')
+                                        grades_list = searched_student.grades.split('|')
+                                        marks_list = searched_student.marks.split('|')
+                                        for idx, course in enumerate(course_list):
+                                            print(f'{course}')
+                                            print(f"{grades_list[idx]} ({marks_list[idx]}%)")
+                                            course_average = Grades.get_course_average(course)
+                                            print(f'Above average ({course_average}%)') if int(marks_list[idx]) >= course_average else print(f'Below average ({course_average}%)')
                                 elif student_choice == '4':
+                                    print('Displaying all grades...')
+                                    Grades.display_grade_report()
+                                elif student_choice == '5':
                                     print('Adding student...')
                                     first_name, last_name, email_address, course_ids, grades, marks = add_student()
                                     new_student = Student(first_name, last_name, email_address, course_ids, grades, marks)
                                     new_student.add_new_student(new_student)
-                                elif student_choice == '5':
+                                elif student_choice == '6':
                                     print('Modifying student...')
-                                    student_email = input('Enter the email of the student you would like to edit: ')
-                                    update_student = get_student(student_email)
+                                    student_id = input('Enter the email of the student you would like to edit: ')
+                                    update_student = get_student(student_id)
                                     if update_student:
-                                        print(f'The current grade and mark for {update_student.first_name} {update_student.last_name} is {update_student.grades} ({update_student.marks}%)')
-                                        new_mark = input(f'Enter the new mark for {update_student.first_name} {update_student.last_name}: ')
-                                        if isinstance(int(new_mark), int):
-                                            if 0 <= int(new_mark) <= 100:
-                                                new_grade = input(f'Enter the new grade for {update_student.first_name} {update_student.last_name}: ')
-                                                update_student.update_student_record(new_grade, new_mark)
+                                        course_list = update_student.course_ids.split('|')
+                                        grades_list = update_student.grades.split('|')
+                                        marks_list = update_student.marks.split('|')
+                                        if len(course_list) > 1:
+                                            for idx, course in enumerate(course_list):
+                                                print(f'{idx + 1}. {course}: {grades_list[idx]} ({marks_list[idx]}%)')
+                                            modify_grade = input('Enter the number of the course you would like to update the grade/mark for: ')
+                                            if 0 < int(modify_grade) < len(course_list):
+                                                updated_mark = input(f'Enter the new mark for {update_student.first_name} {update_student.last_name}: ')
+                                                if isinstance(int(updated_mark), int):
+                                                    if 0 <= int(updated_mark) <= 100:
+                                                        updated_grade = input(f'Enter the new grade for {update_student.first_name} {update_student.last_name}: ')
+                                                        new_grade = update_student.grades.replace(grades_list[int(modify_grade)-1], updated_grade)
+                                                        new_mark = update_student.marks.replace(marks_list[int(modify_grade)-1], updated_mark)
+                                                        update_student.update_student_record(new_grade, new_mark)
+                                                    else:
+                                                        print('New mark must be valid (between 0 to 100!)')
+                                                else:
+                                                    print('Please enter a valid integer!')
                                             else:
-                                                print('New mark must be valid (between 0 to 100!)')
+                                                print('Invalid number selected!')
                                         else:
-                                            print('Please enter a valid integer!')
+                                            print(f'The current grade and mark for {update_student.first_name} {update_student.last_name} is {update_student.grades} ({update_student.marks}%)')
+                                            new_mark = input(f'Enter the new mark for {update_student.first_name} {update_student.last_name}: ')
+                                            if isinstance(int(new_mark), int):
+                                                if 0 <= int(new_mark) <= 100:
+                                                    new_grade = input(f'Enter the new grade for {update_student.first_name} {update_student.last_name}: ')
+                                                    update_student.update_student_record(new_grade, new_mark)
+                                                else:
+                                                    print('New mark must be valid (between 0 to 100!)')
+                                            else:
+                                                print('Please enter a valid integer!')
                                     else:
                                         print('Please try again!')
-                                elif student_choice == '6':
+                                elif student_choice == '7':
                                     print('Deleting student...')
                                     email_address = input('Enter the email address of the student to be deleted: ')
                                     delete_student = Student(first_name = None, last_name = None, email_address = None, course_ids = None, grades = None, marks = None)
                                     delete_student.delete_student(email_address)
-                                elif student_choice == '7':
+                                elif student_choice == '8':
                                     print('Returning to option screen...')
                                     student_screen = False
                                 else:
@@ -983,7 +1029,7 @@ def checkmygrade_main_menu():
                                     email_address = input('Enter the email address of the professor you wish to modify: ')
                                     update_professor = get_professor(email_address)
                                     if update_professor:
-                                        new_rank = input(f'Enter the new rank of {update_professor.name}')
+                                        new_rank = input(f'Enter the new rank of {update_professor.name}: ')
                                         update_professor.modify_professor_details(new_rank)
                                     else:
                                         print('Professor not found! Make sure you entered their email correctly.')
