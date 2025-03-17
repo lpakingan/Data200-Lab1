@@ -4,6 +4,7 @@ import shutil
 import unittest
 import random
 import time
+import statistics
 
 class LoginUser:
     '''user class that includes a user's login information for the application'''
@@ -366,6 +367,16 @@ class Grades:
                     course_grades.append(int(grade[2]))
         class_average = sum(course_grades) / len(course_grades)
         return class_average
+    
+    @staticmethod
+    def get_course_median(course):
+        course_grades = []
+        grades = Grades.get_grades()
+        for grade in grades:
+                if grade[3] == course:
+                    course_grades.append(int(grade[2]))
+        class_median = statistics.median(course_grades)
+        return class_median
 
 class Node:
     def __init__(self, data):
@@ -763,7 +774,9 @@ def checkmygrade_main_menu():
                             print('Getting information for comparison...')
                             print(f'You current mark in {current_student.course_ids} is {current_student.marks}%')
                             course_average = Grades.get_course_average(current_student.course_ids)
-                            print(f'The current class average is {course_average}%')
+                            print(f'The current course average is {course_average}%')
+                            course_median = Grades.get_course_median(current_student.course_ids)
+                            print(f'The current course median is {course_median}')
                             print('Keep it up!') if int(current_student.marks) >= course_average else print('Keep your head up!') 
                         elif choice == '4':
                             print('Changing your password...')
@@ -799,6 +812,8 @@ def checkmygrade_main_menu():
                             Grades.display_grades_by_course(current_professor.course_id)
                             course_average = Grades.get_course_average(current_professor.course_id)
                             print(f'Course average: {course_average}%')
+                            course_median = Grades.get_course_median(current_professor.course_id)
+                            print(f'Course median: {course_median}')
                         elif choice == '3':
                             print('Showing list of students in your course...')
                             Grades.display_grades_by_course(current_professor.course_id)
@@ -863,12 +878,13 @@ def checkmygrade_main_menu():
                                     Student.display_records()
                                 elif student_choice == '2':
                                     print('Sort students...')
-                                    sort_by = input('''How would you like to sort?
-                                                    1. By student ID (email address) 
-                                                    2. By student ID (email address) (reversed)
-                                                    3. By grade
-                                                    4. By grade (descending)
-                                                    ''')
+                                    print('''How would you like to sort?
+                                            1. By student ID (email address) 
+                                            2. By student ID (email address) (reversed)
+                                            3. By grade
+                                            4. By grade (descending)
+                                            ''')
+                                    sort_by = input('Enter number of how you would like to sort: ')
                                     if sort_by == '1':
                                         Student.sort_students('email', 'default')
                                     elif sort_by == '2':
