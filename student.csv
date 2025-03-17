@@ -1,5 +1,5 @@
 ﻿student_id,first_name,last_name,course_ids,grades,marks
-mae@myschool.edu,Samantha,Mae,DATA200|DATA201,B-|A-,80|92
+mae@myschool.edu,Samantha,Mae,DATA200|DATA201,B+|A-,88|92
 russell@myschool.edu,Sally,Russell,DATA200,A-,90
 doe@myschool.edu,John,Doe,DATA201|DATA203,A|B+,94|89
 smart@myschool.edu,Jane,Smart,DATA200|DATA201|DATA202,B+|A-|A,88|90|96

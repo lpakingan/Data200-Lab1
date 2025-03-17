@@ -838,16 +838,30 @@ def checkmygrade_main_menu():
                             student_email = input('Enter the email of the student you would like to edit: ')
                             update_student = get_student(student_email)
                             if update_student:
-                                print(f'The current grade and mark for {update_student.first_name} {update_student.last_name} is {update_student.grades} ({update_student.marks}%)')
-                                new_mark = input(f'Enter the new mark for {update_student.first_name} {update_student.last_name}: ')
-                                if isinstance(int(new_mark), int):
-                                    if 0 <= int(new_mark) <= 100:
-                                        new_grade = input(f'Enter the new grade for {update_student.first_name} {update_student.last_name}: ')
+                                course_list = update_student.course_ids.split('|')
+                                grades_list = update_student.grades.split('|')
+                                marks_list = update_student.marks.split('|')
+                                idx = course_list.index(current_professor.course_id)
+                                updated_mark = input(f'Enter the new mark for {update_student.first_name} {update_student.last_name}: ')
+                                if isinstance(int(updated_mark), int):
+                                    if 0 <= int(updated_mark) <= 100:
+                                        updated_grade = input(f'Enter the new grade for {update_student.first_name} {update_student.last_name}: ')
+                                        new_grade = update_student.grades.replace(grades_list[idx], updated_grade)
+                                        new_mark = update_student.marks.replace(marks_list[idx], updated_mark)
                                         update_student.update_student_record(new_grade, new_mark)
                                     else:
-                                        print('New mark must be valid (between 0 to 100!)')
+                                        print('New mark must be valid (between 0 to 100!)')         
                                 else:
-                                    print('Please enter a valid integer!')
+                                    print(f'The current grade and mark for {update_student.first_name} {update_student.last_name} is {update_student.grades} ({update_student.marks}%)')
+                                    new_mark = input(f'Enter the new mark for {update_student.first_name} {update_student.last_name}: ')
+                                    if isinstance(int(new_mark), int):
+                                        if 0 <= int(new_mark) <= 100:
+                                            new_grade = input(f'Enter the new grade for {update_student.first_name} {update_student.last_name}: ')
+                                            update_student.update_student_record(new_grade, new_mark)
+                                        else:
+                                            print('New mark must be valid (between 0 to 100!)')
+                                    else:
+                                        print('Please enter a valid integer!')
                             else:
                                 print('Please try again!')
                         elif choice == '4':
