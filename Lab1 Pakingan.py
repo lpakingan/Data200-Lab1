@@ -1,0 +1,939 @@
+import csv
+import getpass
+import shutil
+import unittest
+import random
+import time
+
+class LoginUser:
+    '''user class that includes a user's login information for the application'''
+    def __init__(self, email_address, password):
+        self.email_address = email_address
+        self.password = password
+
+    def get_logins(self):
+        login_data = LinkedList()
+        with open('login.csv', newline = '') as csvfile:
+            logins = csv.reader(csvfile)
+            next(logins)
+            for login in logins:
+                login_data.add_new(login)
+            return login_data
+
+    def login(self):
+        '''checks the login details of the current user and logs them in if correct'''
+        # linked list method
+        logins = self.get_logins()
+        login_exists = False
+        if logins.check_head():
+            c1 = logins.head
+            while c1 is not None:
+                if c1.data[0] == self.email_address:
+                    encrypted_password = self.encrypt_password(self.password)
+                    if encrypted_password == c1.data[1]:
+                        print('You are now logged in!')
+                        print(f'{c1.data[0]}: {c1.data[1]}')
+                        login_exists = True
+                        return True, c1.data[0], c1.data[2]
+                    else:
+                        print("Unable to login! Returning to login screen...")
+                        login_exists = True
+                        return False, None, None
+                else: 
+                    print('Checking next...')
+                    c1 = c1.next
+
+        if not login_exists:
+            print('The email address is not associated with an account!')
+            return False, None, None
+
+    def logout(self):
+        '''logs the current user out of the system'''
+        return False
+
+    def change_password(self):
+        '''changes a user's password'''
+        logins_ll, login_list, header = get_data('login.csv')
+        for login in login_list:
+            if login[0] == self.email_address:
+                new_password = getpass.getpass("Enter your new password: ")
+                encrypted_new_password = self.encrypt_password(new_password)
+                login[1] = self.password = encrypted_new_password
+        write_to_file_array('login.csv', header, login_list)
+        print(f'Your password has been updated! Please try logging in with your new password...')
+        return False
+
+    def encrypt_password(self, password):
+        '''encrypts a user's password'''
+        preencrypted_password = PasswordEncryptor(4)
+        encrypted_password = preencrypted_password.encrypt(password)
+        return encrypted_password
+
+    def decrypt_password(self, password):
+        '''decrypts a user's password'''
+        predecrypted_password = PasswordEncryptor(4)
+        decrypted_password = predecrypted_password.decrypt(password)
+        return decrypted_password
+
+class PasswordEncryptor:
+    '''encrypts and decrypts password'''
+    def __init__(self, shift):
+        self.shifter=shift
+        self.s=self.shifter%26
+  
+    def _convert(self, text,s):
+        '''encrypts/decrypts the password'''
+        result=""
+        for i,ch in enumerate(text):     
+             if (ch.isupper()):
+                  result += chr((ord(ch) + s-65) % 26 + 65)
+             else:
+                  result += chr((ord(ch) + s-97) % 26 + 97)
+        return  result
+  
+    def encrypt(self, text):
+        '''encrypts the password'''
+        return self._convert(text,self.shifter)
+        
+    def decrypt(self, text):
+        '''decrypts the password'''
+        return self._convert(text,26-self.s) 
+
+class Student:
+    '''student class that includes information regarding a student's name, email, grades/marks'''
+    def __init__(self, first_name, last_name, email_address, course_ids, grades, marks):
+        self.first_name = first_name
+        self.last_name = last_name
+        self.email_address = email_address
+        self.course_ids = course_ids
+        self.grades = grades
+        self.marks = marks
+
+    @staticmethod
+    def display_records():
+        '''displays student records'''
+        # array method
+        print('Displaying students...')
+        students_list = get_data('student.csv')[1]
+        for student in students_list:
+            print(f'''
+                  {student[0]}
+                  {student[1]} {student[2]}
+                  Course: {student[3]}
+                  Performance: {student[4]} ({student[5]}%)
+                  ''')
+    
+    def add_new_student(self, student): # student from add_student()
+        '''add a new student into the system'''
+        # linked list method
+        print(f'Checking system to add {student.first_name} {student.last_name}...')
+        students_ll = get_data('student.csv')[0]
+        student_info = [student.email_address, student.first_name, student.last_name, student.course_ids, student.grades, student.marks]
+        exists = students_ll.check_for_data_in_ll(self.email_address)
+
+        if students_ll.size() == 0:
+            students_ll.add_first(student_info)
+            add_to_file('student.csv', student_info)
+            print(f'{student.first_name} {student.last_name} successfully added! (First student added)')
+
+        if not exists:
+            students_ll.add_new(student_info)
+            add_to_file('student.csv', student_info)
+            print(f'{student.first_name} {student.last_name} successfully added! (Another student added)')
+
+    def delete_student(self, email_address):
+        '''delete a student in the system using their email address'''
+        # linked list method
+        students_ll, student_list, header = get_data('student.csv')
+        try:
+            print(f'Checking system to delete student associated with email {email_address}...')
+            students_ll.delete_node(email_address)
+            write_to_file_ll('student.csv', header, students_ll)
+        except Exception as e:
+            print(f'Error deleting student: {e}!')
+
+    def check_my_grades(self):
+        '''lets student check their own grades'''
+        # array method
+        student_list = get_data('student.csv')[1]
+        for student in student_list:
+            if student[0] == self.email_address:
+                print(f"You currently have a {self.grades} in {self.course_ids}")
+
+    def update_student_record(self, new_grade, new_mark):
+        '''updates a student's record by using their email address'''
+        # array method
+        students_ll, student_list, header = get_data('student.csv')
+        for student in student_list:
+            if student[0] == self.email_address:
+                student[4] = self.grades = new_grade 
+                student[5] = self.marks = new_mark 
+        write_to_file_array('student.csv', header, student_list)
+        print(f'The grade and mark for {self.first_name} {self.last_name} has been updated to {self.grades} ({self.marks}%)')
+
+    def check_my_marks(self):
+        '''lets student check their own marks'''
+        # array method
+        student_list = get_data('student.csv')[1]
+        for student in student_list:
+            if student[0] == self.email_address:
+                print(f"You currently have a mark of {self.marks}% in {self.course_ids}")
+
+    @staticmethod
+    def sort_students(by, order):
+        '''sorts students either by email or grade'''
+        student_list = get_data('student.csv')[1]
+        sorted_list = sorted(student_list, key = lambda x: x[0]) if by == 'email' else sorted(student_list, key = lambda x: x[5])
+        if order == 'reverse':
+            sorted_list = sorted_list[::-1]
+        for student in sorted_list:
+            print(f'''
+                  {student[0]}
+                  {student[2]}, {student[1]}
+                  Enrolled in: {student[3]}
+                  Current grade for {student[3]}: {student[4]}
+                  Mark: {student[5]}
+                  ''')
+        
+class Course:
+    '''course class that includes information regarding a course's id, credits, name'''
+    def __init__(self, course_id, credits, course_name, course_description):
+        self.course_id = course_id
+        self.credits = credits
+        self.course_name = course_name
+        self.course_description = course_description
+
+    @staticmethod # static to call out of course object
+    def display_courses():
+        '''displays all courses'''
+        print('Displaying courses...')
+        courses_list = get_data('course.csv')[1]
+        for course in courses_list:
+            print(f'''
+                  {course[0]}
+                  Name: {course[1]}
+                  Credits: {course[2]}
+                  Description: {course[3]}
+                  ''')
+
+    def add_new_course(self, course): # course from add_course()
+        '''add a new course'''
+        print(f'Checking system to add {course.course_id}...')
+        courses_ll = get_data('course.csv')[0]
+        course_info = [course.course_id, course.credits, course.course_name, course.course_description]
+        exists = courses_ll.check_for_data_in_ll(self.course_id)
+
+        if courses_ll.size() == 0:
+            courses_ll.add_first(course_info)
+            add_to_file('course.csv', course_info)
+            print(f'{course.course_id} successfully added! (First course added)')
+
+        if not exists:
+            courses_ll.add_new(course_info)
+            add_to_file('course.csv', course_info)
+            print(f'{course.course_id} successfully added! (Another course added)')
+
+    def delete_course(self, id):
+        '''delete a course using its id'''
+        courses_ll, course_list, header = get_data('course.csv')
+        try:
+            print(f'Checking system to delete course associated with the course id {id}...')
+            courses_ll.delete_node(id)
+            write_to_file_ll('course.csv', header, courses_ll)
+        except Exception as e:
+            print(f'Error deleting course: {e}!')
+    
+class Professor:
+    '''professor class that includes information regarding a professor's name, email, rank'''
+    def __init__(self, email_address, name, rank, course_id):
+        self.name = name
+        self.email_address = email_address
+        self.rank = rank
+        self.course_id = course_id
+
+    @staticmethod
+    def professors_details():
+        '''displays all professors'''
+        print('Displaying professor details...')
+        professors_list = get_data('professor.csv')[1]
+        for professor in professors_list:
+            print(f'''
+                  {professor[0]}
+                  {professor[1]}
+                  Rank: {professor[2]}
+                  Currently Teaching: {professor[3]}
+                  ''')
+
+    def add_new_professor(self, professor): # professor from add_professor()
+        '''add a new professor into the system'''
+        print(f'Checking system to add {professor.name}...')
+        professors_ll = get_data('professor.csv')[0]
+        professor_info = [professor.email_address, professor.name, professor.rank, professor.course_id]
+        exists = professors_ll.check_for_data_in_ll(self.email_address)
+
+        if professors_ll.size() == 0:
+            professors_ll.add_first(professor_info)
+            add_to_file('professor.csv', professor_info)
+            print(f'{professor.name} successfully added! (First professor added)')
+
+        if not exists:
+            professors_ll.add_new(professor_info)
+            add_to_file('professor.csv', professor_info)
+            print(f'{professor.name} successfully added! (Another professor added)')
+    
+    def delete_professor(self, email_address):
+        '''delete a professor using their email address'''
+        professors_ll, professor_list, header = get_data('professor.csv')
+        try:
+            print(f'Checking system to delete professor associated with the email {email_address}...')
+            professors_ll.delete_node(email_address)
+            write_to_file_ll('professor.csv', header, professors_ll)
+        except Exception as e:
+            print(f'Error deleting professor: {e}!')
+
+    def modify_professor_details(self, new_rank):
+        '''modify a professor in the system using their email address'''
+        professors_ll, professor_list, header = get_data('professor.csv')
+        for professor in professor_list:
+            if professor[0] == self.email_address:
+                professor[2] = self.rank = new_rank
+        write_to_file_array('professor.csv', header, professor_list)
+        print(f'The rank for {self.name} has been updated to {self.rank}')
+
+    def show_course_details_by_professor(self):
+        '''show a professor's course using their email address'''
+        professor_list = get_data('professor.csv')[1]
+        course_list = get_data('course.csv')[1]
+        for professor in professor_list:
+            if professor[0] == self.email_address:
+                for course in course_list:
+                    if professor[3] == course[0]:
+                        print(f'''
+                              Showing course details for {professor[1]}:
+                              ID: {course[0]}
+                              Name: {course[1]}
+                              Credits: {course[2]}
+                              Description: {course[3]}
+                              '''
+                        )
+
+class Grades:
+    '''grades class that includes information regarding a specific grade for a student'''
+    def __init__(self, grade_id, grade, mark, course_id = None):
+        self.grade_id = grade_id # email address to match with the student it is assigned to
+        self.grade = grade
+        self.mark = mark
+
+    @staticmethod
+    def get_grades():
+        student_grades = get_data('student.csv')[1]
+        grade_data = [[student_grades[student][0], student_grades[student][4], student_grades[student][5], student_grades[student][3]] for student in range(len(student_grades))]
+        return grade_data
+    
+    @staticmethod
+    def display_grade_report():
+        '''displays a report of all the grades for students'''
+        grades = Grades.get_grades()
+        for grade in grades:
+            grade_id = grade[0]
+            grade_id = Grades(grade[0], grade[1], grade[2], grade[3])
+            print(f'{grade_id.grade_id}: {grade_id.grade} / {grade_id.mark}% / {grade[3]}')
+
+    @staticmethod
+    def display_grades_by_course(course):
+        grades = Grades.get_grades()
+        course_grades = []
+        for grade in grades:
+            if grade[3] == course:
+                course_grades.append(grade[2])
+                print(f'{grade[0]}: {grade[1]} ({grade[2]}%)')
+        
+        print(f'There are {len(course_grades)} students in {course}.')
+
+    @staticmethod
+    def get_course_average(course):
+        course_grades = []
+        grades = Grades.get_grades()
+        for grade in grades:
+                if grade[3] == course:
+                    course_grades.append(int(grade[2]))
+        class_average = sum(course_grades) / len(course_grades)
+        return class_average
+
+class Node:
+    def __init__(self, data):
+        self.data = data 
+        self.next = None 
+
+class LinkedList:
+    '''linked list class that allows for efficient insertion/deletion/sorting of data'''
+    def __init__(self):
+        self.head = None
+    
+    def check_head(self):
+        return True if self.head is not None else False
+    
+    def check_for_data_in_ll(self, data):
+        if self.check_head():
+            c1 = self.head
+            while c1 is not None:
+                if c1.data[0] == data:
+                    print(f'{data} already exists in the system!')
+                    return True
+                else:
+                    c1 = c1.next
+                    
+            return False
+    
+    def add_first(self, data):
+        '''add first node if linked list is empty'''
+        if self.head is None: 
+            self.head = Node(data)
+        else:
+            c1 = self.head 
+            self.head = Node(data) 
+            self.head.next = c1 
+
+    def add_new(self, data):
+        '''add node at last position'''
+        if self.head is None:
+            self.head = Node(data)
+        else:
+            c1 = self.head
+            while c1.next is not None:
+                c1 = c1.next 
+            c1.next = Node(data) 
+
+    def print(self):
+        '''print the  linked list'''
+        if self.check_head(): 
+           c1 = self.head
+        if self.head is not None:
+            c1 = self.head
+            while c1 is not None:
+                print(c1.data)
+                c1 = c1.next 
+
+    def size(self):
+        '''get the size of linked list'''
+        count=0
+        c1 = self.head
+        while c1:
+            c1 = c1.next
+            count = count + 1
+        return count
+
+    def delete_node(self, data):
+        '''delete the linked list's node with specific data'''
+        flag = False
+        prev_node = None
+        if self.check_head(): 
+            c1 = self.head 
+            while c1 is not None: 
+                if c1.data[0] == data: 
+                    print(f'Deleting {data}... \n')
+                    if prev_node is None: # checking if first node; if so, move head to the next node
+                        flag = True 
+                        self.head = c1.next
+                        print(f'{data} successfully deleted!')
+                        break
+                    else: # if not first node, point previous node to the node after this one
+                        flag = True
+                        prev_node.next = c1.next
+                        print(f'{data} successfully deleted!')
+                        break
+                prev_node = c1
+                c1 = c1.next
+        else:
+            print("There are currently no values to delete!")
+
+        if not flag:
+            print(f"{data} was not found in the system!")
+
+class TestCheckMyGrade (unittest.TestCase):
+    '''test cases for the above class methods'''
+    def test_01_add_students(self):
+        '''unit test for checking the successful addition of 1000 sturent records (using linked list)'''
+        self.courses = ['DATA200', 'DATA201', 'DATA202', 'DATA203', 'DATA204']
+
+        pre_added_students = get_data('student.csv')[1] # to keep the index of the actual data
+        real_data_rows = len(pre_added_students)
+        
+        for i in range (0, 1000):
+            first_name = 'firstname' + str(i)
+            last_name = 'lastname' + str(i)
+            email_address = last_name + '@myschool.edu'
+            course_ids = random.choice(self.courses)
+            grades = None # this will be modified in a future test
+            marks = random.randint(40,100)
+            test_student = Student(first_name, last_name, email_address, course_ids, grades, marks)
+            test_student.add_new_student(test_student)
+            post_added_students = get_data('student.csv')[1]
+        
+        self.assertEqual((len(post_added_students)), (real_data_rows + 1000))
+        print('1000 students successfully added!')
+
+    def test_02_modify_students(self):
+        '''unit test for modifying grades of students; replaces the None values for grades of previous test with actual grades'''
+        for i in range (0, 1000):
+            last_name = 'lastname' + str(i)
+            email_address = last_name + '@myschool.edu'
+            test_student = get_student(email_address)
+
+            new_mark = random.randint(40,100)
+            if new_mark < 60:
+                new_grade = 'F'
+            elif 60 <= new_mark <= 64:
+                new_grade = 'D-'
+            elif new_mark == 65:
+                new_grade = 'D'
+            elif 66 <= new_mark <= 69:
+                new_grade = 'D+'
+            elif 70 <= new_mark <= 74:
+                new_grade = 'C-'
+            elif new_mark == 75:
+                new_grade = 'C'
+            elif 76 <= new_mark <= 79:
+                new_grade = 'C+'
+            elif 80 <= new_mark <= 84:
+                new_grade = 'B-'
+            elif new_mark == 85:
+                new_grade = 'B'
+            elif 86 <= new_mark <= 89:
+                new_grade = 'B+'
+            elif 90 <= new_mark <= 94:
+                new_grade = 'A-'
+            elif new_mark == 95:
+                new_grade = 'A'
+            elif 96 <= new_mark <= 100:
+                new_grade = 'A+'
+            test_student.update_student_record(new_grade, new_mark)
+        
+        self.assertIsNotNone(test_student.grades) # checks to see if the student grades are no longer None
+        print('Student grades were modified!')
+    
+    def test_03_delete_students(self):
+        '''unit test for deleting the 1000 sturent records (using linked list)'''
+        pre_deleted_students = get_data('student.csv')[1] 
+        pre_deleted_students_length = len(pre_deleted_students)
+        
+        for i in range (0, 1000):
+            last_name = 'lastname' + str(i)
+            email_address = last_name + '@myschool.edu'
+            test_student = Student(first_name = None, last_name = None, email_address = None, course_ids = None, grades = None, marks = None)
+            test_student.delete_student(email_address)
+            post_deleted_students = get_data('student.csv')[1]
+        
+        self.assertEqual((len(post_deleted_students)), (pre_deleted_students_length - 1000), 'After 1000 students inserted') 
+        print('1000 students were deleted!')
+
+    def test_04_load_file(self):
+        '''unit test for checking to see if students from student.csv file were successfully loaded'''
+        students_from_file = get_data('student.csv')[0] 
+        self.assertGreater(students_from_file.size(), 0)
+        print('Student loaded from file successfully')
+    
+    def test_05_search_from_loaded_file(self):
+        '''unit test for timing searches of certain students'''
+        print('Searching for students...')
+        starting_time_1 = time.time()
+        searched_student_1 = get_student('mae@myschool.edu') # get_student inherently calls loads the file (uses get_data function)
+        print(f'Amount of time it took to find {searched_student_1.first_name} {searched_student_1.last_name}: {(time.time() - starting_time_1)} seconds')
+
+        starting_time_2 = time.time()
+        searched_student_2 = get_student('smith@myschool.edu')
+        print(f'Amount of time it took to find {searched_student_2.first_name} {searched_student_2.last_name}: {(time.time() - starting_time_2)} seconds')
+    
+    def test_06_sort_students(self):
+        '''unit test for sorting students by email (asc and desc order)'''
+        starting_time_1 = time.time()
+        Student.sort_students('email', 'default') # ascending/default
+        print(f'Amount of time it took to sort in ascending order: {(time.time() - starting_time_1)} seconds')
+
+        starting_time_2 = time.time()
+        Student.sort_students('email', 'reverse') # descending
+        print(f'Amount of time it took to sort in ascending order: {(time.time() - starting_time_2)} seconds')
+
+    def test_07_add_delete_course(self):
+        '''unit test that checks if a course has been added/modified/deleted'''
+        # add course
+        test_course = Course('DATA1000',3,'Data Test Course', 'Test course')
+        test_course.add_new_course(test_course)
+
+        courses = get_data('course.csv')[1]
+        course_ids = [course[0] for course in courses]
+
+        self.assertIn('DATA1000', course_ids) 
+        print('Course added successfully!')
+    
+        # delete course
+        test_course.delete_course('DATA1000')
+        updated_courses = get_data('course.csv')[1]
+        updated_course_ids = [course[0] for course in updated_courses]
+        self.assertNotIn('DATA1000', updated_course_ids) 
+        print('Course deleted successfully!')
+
+    def test_08_add_modify_delete_professor(self):
+        '''unit test that checks if a professor has been added/modified/deleted'''
+        # add professor
+        test_professor = Professor('professor@myschool.edu', 'Test Professor', 'Lecturer', 'DATA1000')
+        test_professor.add_new_professor(test_professor)
+
+        professors = get_data('professor.csv')[1]
+        professor_ids = [professor[0] for professor in professors]
+
+        self.assertIn('professor@myschool.edu', professor_ids) 
+        print('Professor added successfully!')
+
+        # modify professor
+        test_professor.modify_professor_details('Tenured Lecturer')
+        self.assertIsNot('Lecturer', test_professor.rank) # check if the professor object's rank was modified
+        print('Professor updated successfully!')
+    
+        # delete professor
+        test_professor.delete_professor('professor@myschool.edu')
+        updated_professors = get_data('professor.csv')[1]
+        updated_professor_ids = [professor[0] for professor in updated_professors]
+        self.assertNotIn('professor@myschool.edu', updated_professor_ids) 
+        print('Professor deleted successfully!')
+
+
+# HELPER FUNCTIONS
+def get_data(file):
+    # linked list method
+    data_ll = LinkedList()
+    with open(file, newline = '') as csvfile:
+        dataset = csv.reader(csvfile)
+        header = next(dataset)
+        for data in dataset:
+            data_ll.add_new(data)
+
+    # array method
+    data_list = []
+    c1 = data_ll.head
+    while c1:
+        data_list.append(c1.data)
+        c1 = c1.next
+    
+    return data_ll, data_list, header
+
+def add_student():
+    '''gets student details for add_new_student()'''
+    first_name = input('Enter first name of student: ')
+    last_name = input('Enter last name of student: ')
+    email_address = input('Enter email of student: ')
+    course_ids = input('Enter the course that the student is enrolled in: ')
+    grades = input('Enter the grade the student has in the course: ')
+    marks = input('Enter the mark in integer form of the student: ')
+    return first_name.strip(), last_name.strip(), email_address.strip(), course_ids.strip(), grades.strip(), marks.strip()
+
+def get_student(email_address):
+    '''get one student's details'''
+    student_list = get_data('student.csv')[1]
+    for student in student_list:
+        if student[0] == email_address:
+            current_student = Student(student[1], student[2], student[0], student[3], student[4], student[5])
+            return current_student
+    else:
+        print('No student found with the email!')
+        return None
+
+def get_professor(email_address):
+    '''get one professor's details'''
+    professor_list = get_data('professor.csv')[1]
+    for professor in professor_list:
+        if professor[0] == email_address:
+            current_professor = Professor(professor[0], professor[1], professor[2], professor[3])
+            return current_professor
+    else:
+        print('No professor found with the email!')
+        return None
+
+def add_course():
+    '''gets course details for add_new_course()'''
+    course_id = input('Enter id of the course: ') # i.e. DATA200
+    str_credits = input('Enter the number of credits of the course: ')
+    course_name = input('Enter the name of the course: ')
+    course_description = input('Enter the description of the course: ')
+    try:
+        credits = int(str_credits)
+        if credits > 0:
+            return course_id.strip(), credits, course_name.strip(), course_description.strip()
+        else:
+            print('Credits must be a non-zero/non-negative number!')
+    except ValueError:
+        print('Credits are invalid! Enter a valid integer!')
+
+def add_professor():
+    '''gets professor details for add_new_professor()'''
+    name = input('Enter the name of the professor: ')
+    email_address = input('Enter the email of the professor: ')
+    rank = input('Enter the rank of the professor: ')
+    course_id = input('Enter the course id of the course the professor teaches: ')
+    return email_address.strip(), name.strip(), rank.strip(), course_id.strip()
+
+def add_grade():
+    '''gets grade details for add_new_grade()'''
+    id = input('Enter id of the grade: ') 
+    grade = input('Enter the grade: ') # letter grade 
+    mark = input('Enter mark: ') # integer percentage
+    return id.strip(), grade.strip(), int(mark.strip())
+
+def add_to_file(file, data): 
+    '''add new line to given file with data'''
+    with open(file, 'a', newline = '') as writingfile:
+        writer = csv.writer(writingfile)
+        writer.writerow(data)
+
+def write_to_file_array(file, header, data): 
+    '''rewrite to given file with data using array'''
+    with open(file, 'w', newline = '') as writingfile:
+        writer = csv.writer(writingfile)
+        writer.writerow(header)
+        writer.writerows(data)
+
+def write_to_file_ll(file, header, data): 
+    '''rewrite to given file with data using linked list'''
+    formatted_data = []
+    formatted_data.append(header)
+    c1 = data.head
+
+    while c1:
+        formatted_data.append(c1.data)
+        c1 = c1.next
+
+    with open(file, 'w', newline = '') as writingfile:
+        writer = csv.writer(writingfile)
+        writer.writerows(formatted_data)
+
+def checkmygrade_main_menu():
+    while True:
+        columns = shutil.get_terminal_size().columns
+        print('================================='.center(columns))
+        print('Welcome to CheckMyGrade'.center(columns))
+        print('================================'.center(columns))
+        print('\n CheckMyGrade Menu:')
+        print('1. Login')
+        print('2. Exit')
+        choice = input('Enter your choice: ')
+        if choice == '1':
+            print('Logging in...')
+            email_address = input('Enter your email address: ')
+            password = getpass.getpass('Enter your password: ')
+            current_user = LoginUser(email_address.strip(), password.strip())
+            status, email_address, role = current_user.login()
+            print(status, email_address, role) 
+            if status:
+                if role == 'student':
+                    current_student = get_student(current_user.email_address)
+                    while True:
+                        print('================================='.center(columns))
+                        msg='''Welcome to CheckMyGrade'''
+                        print(msg.center(columns))
+                        msg2='''Student Portal'''
+                        print(msg2.center(columns))
+                        print('================================'.center(columns))
+                        print('\n CheckMyGrade Main Menu:')
+                        print('1. Check my grade')
+                        print('2. Check my mark')
+                        print("3. Compare my mark against course average")
+                        print('4. Change my password')
+                        print('5. Logout')
+                        choice = input('Enter what you would like to do: ')
+                        if choice == '1':
+                            print('Checking your grade...')
+                            current_student.check_my_grades()
+                        elif choice == '2':
+                            print('Checking your mark...')
+                            current_student.check_my_marks()
+                        elif choice == '3':
+                            print('Getting information for comparison...')
+                            print(f'You current mark in {current_student.course_ids} is {current_student.marks}%')
+                            course_average = Grades.get_course_average(current_student.course_ids)
+                            print(f'The current class average is {course_average}%')
+                            print('Keep it up!') if int(current_student.marks) >= course_average else print('Keep your head up!') 
+                        elif choice == '4':
+                            print('Changing your password...')
+                            current_user.change_password()
+                        elif choice == '5':
+                            print('Logging out...')
+                            current_user.logout()
+                            return False
+                        else:
+                            print('Enter a valid choice!')
+                elif role == 'professor':
+                    current_professor = get_professor(current_user.email_address)
+                    while True:
+                        print('================================='.center(columns))
+                        msg='''Welcome to CheckMyGrade'''
+                        print(msg.center(columns))
+                        msg2='''Professor Portal'''
+                        print(msg2.center(columns))
+                        print('================================'.center(columns))
+                        print('\n CheckMyGrade Main Menu:')
+                        print('1. Check my course')
+                        print('2. Get grade report for my course')
+                        print('3. Change student grades/marks')
+                        print('4. Change my password')
+                        print('5. Logout')
+                        choice = input('Enter what you would like to do: ')
+                        if choice == '1':
+                            print('Retrieving your course details...')
+                            current_professor.show_course_details_by_professor()
+                        elif choice == '2':
+                            print(f'Getting grade report for your course ({current_professor.course_id})...')
+                            Grades.display_grades_by_course(current_professor.course_id)
+                            course_average = Grades.get_course_average(current_professor.course_id)
+                            print(f'Course average: {course_average}%')
+                        elif choice == '3':
+                            print('Showing list of students in your course...')
+                            Grades.display_grades_by_course(current_professor.course_id)
+                            student_email = input('Enter the email of the student you would like to edit: ')
+                            update_student = get_student(student_email)
+                            if update_student:
+                                print(f'The current grade and mark for {update_student.first_name} {update_student.last_name} is {update_student.grades} ({update_student.marks}%)')
+                                new_mark = input(f'Enter the new mark for {update_student.first_name} {update_student.last_name}: ')
+                                if isinstance(int(new_mark), int):
+                                    if 0 <= int(new_mark) <= 100:
+                                        new_grade = input(f'Enter the new grade for {update_student.first_name} {update_student.last_name}: ')
+                                        update_student.update_student_record(new_grade, new_mark)
+                                    else:
+                                        print('New mark must be valid (between 0 to 100!)')
+                                else:
+                                    print('Please enter a valid integer!')
+                            else:
+                                print('Please try again!')
+                        elif choice == '4':
+                            print('Changing your password...')
+                            current_user.change_password()
+                        elif choice == '5':
+                            print('Logging out...')
+                            current_user.logout()
+                            break
+                        else:
+                            print('Enter a valid choice!')
+                elif role == 'admin':
+                    while True:
+                        print('================================='.center(columns))
+                        msg='''Welcome to CheckMyGrade'''
+                        print(msg.center(columns))
+                        msg2='''Admin Portal'''
+                        print(msg2.center(columns))
+                        print('================================'.center(columns))
+                        print('1. Display all students')
+                        print('2. Display all courses')
+                        print('3. Display all professors')
+                        print('4. Sort students')
+                        print('5. Search students')
+                        print('6. Add student')
+                        print('7. Delete student')
+                        print('8. Add course')
+                        print('9. Delete course')
+                        print('10. Add professor')
+                        print('11. Delete professor')
+                        print('12. Update professor rank')
+                        print('13. Logout')
+                        choice = input('Enter what you would like to do: ')
+                        if choice == '1':
+                            print('Retrieving all students...')
+                            Student.display_records()
+                        elif choice == '2':
+                            print('Retrieving all courses...')
+                            Course.display_courses()
+                        elif choice == '3':
+                            print('Retrieving all professors...')
+                            Professor.professors_details()
+                        elif choice == '4':
+                            print('Sort students...')
+                            sort_by = input('''How would you like to sort?
+                                            1. By student ID (email address) 
+                                            2. By student ID (email address) (reversed)
+                                            3. By grade
+                                            4. By grade (descending)
+                                            ''')
+                            if sort_by == '1':
+                                Student.sort_students('email', 'default')
+                            elif sort_by == '2':
+                                Student.sort_students('email', 'reverse')
+                            elif sort_by == '3':
+                                Student.sort_students('grade', 'default')
+                            elif sort_by == '4':
+                                Student.sort_students('grade', 'reverse')
+                            else:
+                                print('Incorrect input for sorting!')
+                        elif choice == '5':
+                            print('Search for student...')
+                            student_id = input('Enter student email: ')
+                            searched_student = get_student(student_id)
+                            if searched_student is not None:
+                                print(f'Displaying information for {searched_student.first_name} {searched_student.last_name}')
+                                print(f'''
+                                    Enrolled in: {searched_student.course_ids}
+                                    Grade in {searched_student.course_ids}: {searched_student.grades}
+                                    Mark: {searched_student.marks}
+                                    ''')
+                                course_average = Grades.get_course_average(searched_student.course_ids)
+                                print(f'{searched_student.first_name} {searched_student.last_name} is currently above the course average ({course_average})') if int(searched_student.marks) >= course_average else print(f'{searched_student.first_name} {searched_student.last_name} is currently below the course average ({course_average})')
+                            else: 
+                                print('Invalid student email!')
+                        elif choice == '6':
+                            print('Adding student...')
+                            first_name, last_name, email_address, course_ids, grades, marks = add_student()
+                            new_student = Student(first_name, last_name, email_address, course_ids, grades, marks)
+                            new_student.add_new_student(new_student)
+                        elif choice == '7':
+                            print('Deleting student...')
+                            email_address = input('Enter the email address of the student to be deleted: ')
+                            delete_student = Student(first_name = None, last_name = None, email_address = None, course_ids = None, grades = None, marks = None)
+                            delete_student.delete_student(email_address)
+                        elif choice == '8':
+                            print('Adding course...')
+                            course_id, course_name, course_credits, course_description = add_course()
+                            new_course = Course(course_id, course_credits, course_name, course_description)
+                            if new_course:
+                                new_course.add_new_course(new_course)
+                            else:
+                                print('Issue adding course! Make sure you are entering the course details correctly.')
+                        elif choice == '9':
+                            print('Deleting course...')
+                            course_id = input('Enter the course id to be deleted: ')
+                            delete_course = Course(course_id = None, credits = None, course_name = None, course_description = None)
+                            delete_course.delete_course(course_id)
+                        elif choice == '10':
+                            print('Adding professor...')
+                            email_address, name, rank, course_id = add_professor()
+                            new_professor = Professor(email_address, name, rank, course_id)
+                            new_professor.add_new_professor(new_professor)
+                        elif choice == '11':
+                            print('Deleting professor...')
+                            email_address = input('Enter the email address of the professor to be deleted: ')
+                            delete_professor = Professor(email_address = None, name = None, rank = None, course_id = None)
+                            delete_professor.delete_professor(email_address)
+                        elif choice == '12':
+                            print('Update professor details...')
+                            email_address = input('Enter the email address of the professor you wish to modify: ')
+                            update_professor = get_professor(email_address)
+                            if update_professor:
+                                new_rank = input(f'Enter the new rank of {update_professor.name}')
+                                update_professor.modify_professor_details(new_rank)
+                            else:
+                                print('Professor not found! Make sure you entered their email correctly.')
+                        elif choice == '13':
+                            print('Logging out...')
+                            current_user.logout()
+                            break
+                        else: 
+                            print('Enter a valid choice!')
+                        
+        elif choice == '2':
+            print('Exiting CheckMyGrade... Goodbye!')
+            break
+        else:
+            print('Invalid choice! Please try again.')
+
+if __name__ == '__main__':
+    # uncomment out to run unit tests
+    # unittest.main()
+    checkmygrade_main_menu()
+
+           
