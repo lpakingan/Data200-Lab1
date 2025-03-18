@@ -104,7 +104,7 @@ class TestCheckMyGrade (unittest.TestCase):
 
         starting_time_2 = time.time()
         Student.sort_students('email', 'reverse') # descending
-        print(f'Amount of time it took to sort in ascending order: {(time.time() - starting_time_2)} seconds')
+        print(f'Amount of time it took to sort in descending order: {(time.time() - starting_time_2)} seconds')
 
     def test_07_add_delete_course(self):
         '''unit test that checks if a course has been added/modified/deleted'''
@@ -150,4 +150,4 @@ class TestCheckMyGrade (unittest.TestCase):
         print('Professor deleted successfully!')
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(verbosity = 2)
