@@ -3,6 +3,7 @@ import getpass
 import shutil
 import time
 import statistics
+from encdyc import PasswordEncryptDecrypt
 
 class LoginUser:
     '''user class that includes a user's login information for the application'''
@@ -62,39 +63,15 @@ class LoginUser:
 
     def encrypt_password(self, password):
         '''encrypts a user's password'''
-        preencrypted_password = PasswordEncryptor(4)
+        preencrypted_password = PasswordEncryptDecrypt(4)
         encrypted_password = preencrypted_password.encrypt(password)
         return encrypted_password
 
     def decrypt_password(self, password):
         '''decrypts a user's password'''
-        predecrypted_password = PasswordEncryptor(4)
+        predecrypted_password = PasswordEncryptDecrypt(4)
         decrypted_password = predecrypted_password.decrypt(password)
         return decrypted_password
-
-class PasswordEncryptor:
-    '''encrypts and decrypts password'''
-    def __init__(self, shift):
-        self.shifter=shift
-        self.s=self.shifter%26
-  
-    def _convert(self, text,s):
-        '''encrypts/decrypts the password'''
-        result=""
-        for i,ch in enumerate(text):     
-             if (ch.isupper()):
-                  result += chr((ord(ch) + s-65) % 26 + 65)
-             else:
-                  result += chr((ord(ch) + s-97) % 26 + 97)
-        return  result
-  
-    def encrypt(self, text):
-        '''encrypts the password'''
-        return self._convert(text,self.shifter)
-        
-    def decrypt(self, text):
-        '''decrypts the password'''
-        return self._convert(text,26-self.s) 
 
 class Student:
     '''student class that includes information regarding a student's name, email, grades/marks'''
