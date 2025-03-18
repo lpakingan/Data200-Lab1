@@ -44,6 +44,37 @@ class LoginUser:
         if not login_exists:
             print('The email address is not associated with an account!')
             return False, None, None
+    
+    def signup(self, email, password, first_name, last_name, role):
+        """register the current user using the details they have provided"""
+        logins = self.get_logins()
+        login_exists = False
+        if logins.check_head():
+            c1 = logins.head
+            while c1 is not None:
+                if c1.data[0] == email:
+                    login_exists = True
+                    print('The email address is already associated with an account! Please try logging in.')
+                    break
+                else: 
+                    c1 = c1.next
+        
+        if not login_exists:
+            encrypted_password = self.encrypt_password(password)
+            new_user = [email, encrypted_password, role]
+            logins.add_new(new_user)
+            add_to_file('login.csv', new_user)
+            if role == 'student':
+                new_student = [email, first_name, last_name, None, None, None]
+                students_ll = get_data('student.csv')[0]
+                students_ll.add_new(new_student)
+                add_to_file('student.csv', new_student)   
+            else:
+                new_professor = [email, first_name + '' + last_name,  None, None]
+                professors_ll = get_data('professor.csv')[0]
+                professors_ll.add_new(new_professor)  
+                add_to_file('professor.csv', new_professor)
+            print('You have successfully signed up! Please try logging in.')
 
     def logout(self):
         '''logs the current user out of the system'''
@@ -137,11 +168,14 @@ class Student:
         for student in student_list:
             if student[0] == self.email_address:
                 course_list = self.course_ids.split('|')
-                print(f'{self.email_address} is currently taking {len(course_list)} courses.')
-                print('Showing grades...')
-                grades_list = self.grades.split('|')
-                for idx, course in enumerate(course_list):
-                    print(f"{course}: {grades_list[idx]}")
+                if self.course_ids:
+                    print(f'{self.email_address} is currently taking {len(course_list)} courses.')
+                    print('Showing grades...')
+                    grades_list = self.grades.split('|')
+                    for idx, course in enumerate(course_list):
+                        print(f"{course}: {grades_list[idx]}")
+                else:
+                    print(f'{self.email_address} currently has no grades.')
 
     def update_student_record(self, new_grade, new_mark):
         '''updates a student's record by using their email address'''
@@ -161,11 +195,14 @@ class Student:
         for student in student_list:
             if student[0] == self.email_address:
                 course_list = self.course_ids.split('|')
-                print(f'{self.email_address} is currently taking {len(course_list)} courses.')
-                print('Showing marks...')
-                marks_list = self.marks.split('|')
-                for idx, course in enumerate(course_list):
-                    print(f"{course}: {marks_list[idx]}%")
+                if self.course_ids:
+                    print(f'{self.email_address} is currently taking {len(course_list)} courses.')
+                    print('Showing marks...')
+                    marks_list = self.marks.split('|')
+                    for idx, course in enumerate(course_list):
+                        print(f"{course}: {marks_list[idx]}%")
+                else:
+                    print(f'{self.email_address} currently has no marks.')
 
     @staticmethod
     def sort_students(by, order):
@@ -177,9 +214,7 @@ class Student:
         if order == 'reverse':
             sorted_list = sorted_list[::-1]
         for data in sorted_list:
-            print(f'''
-                  {data}
-                  ''')
+            print(data)
         print(f'Sorting time: {time.time() - start_time} seconds')
         
 class Course:
@@ -579,7 +614,8 @@ def checkmygrade_main_menu():
         print('================================'.center(columns))
         print('\n CheckMyGrade Menu:')
         print('1. Login')
-        print('2. Exit')
+        print('2. Signup')
+        print('3. Exit')
         choice = input('Enter your choice: ')
         if choice == '1':
             print('Logging in...')
@@ -616,13 +652,16 @@ def checkmygrade_main_menu():
                             print('Getting information for comparison...')
                             course_ids = current_student.course_ids.split('|')
                             marks = current_student.marks.split('|')
-                            for idx, course in enumerate(course_ids):
-                                print(f'Class {idx+1}: {course}')
-                                print(f'Your mark: {marks[idx]}%')
-                                course_average = Grades.get_course_average(course)
-                                print(f'Average: {course_average:1f}%')
-                                course_median = Grades.get_course_median(course)
-                                print(f'Median: {course_median}%')
+                            if current_student.course_ids:
+                                for idx, course in enumerate(course_ids):
+                                    print(f'Class {idx+1}: {course}')
+                                    print(f'Your mark: {marks[idx]}%')
+                                    course_average = Grades.get_course_average(course)
+                                    print(f'Average: {course_average:1f}%')
+                                    course_median = Grades.get_course_median(course)
+                                    print(f'Median: {course_median}%')
+                            else:
+                                print('You currently have no grades/marks to compare.')
                         elif choice == '4':
                             print('Changing your password...')
                             current_user.change_password()
@@ -651,46 +690,55 @@ def checkmygrade_main_menu():
                         choice = input('Enter what you would like to do: ')
                         if choice == '1':
                             print('Retrieving your course details...')
-                            current_professor.show_course_details_by_professor()
+                            if current_professor.course_id:
+                                current_professor.show_course_details_by_professor()
+                            else:
+                                print('You are not currently teaching any courses.')
                         elif choice == '2':
-                            print(f'Getting grade report for your course ({current_professor.course_id})...')
-                            Grades.display_grades_by_course(current_professor.course_id)
-                            course_average = Grades.get_course_average(current_professor.course_id)
-                            print(f'Course average: {course_average}%')
-                            course_median = Grades.get_course_median(current_professor.course_id)
-                            print(f'Course median: {course_median}')
+                            if current_professor.course_id:
+                                print(f'Getting grade report for your course ({current_professor.course_id})...')
+                                Grades.display_grades_by_course(current_professor.course_id)
+                                course_average = Grades.get_course_average(current_professor.course_id)
+                                print(f'Course average: {course_average}%')
+                                course_median = Grades.get_course_median(current_professor.course_id)
+                                print(f'Course median: {course_median}')
+                            else:
+                                print('You are not currently teaching any courses.')
                         elif choice == '3':
                             print('Showing list of students in your course...')
-                            Grades.display_grades_by_course(current_professor.course_id)
-                            student_email = input('Enter the email of the student you would like to edit: ')
-                            update_student = get_student(student_email)
-                            if update_student:
-                                course_list = update_student.course_ids.split('|')
-                                grades_list = update_student.grades.split('|')
-                                marks_list = update_student.marks.split('|')
-                                idx = course_list.index(current_professor.course_id)
-                                updated_mark = input(f'Enter the new mark for {update_student.first_name} {update_student.last_name}: ')
-                                if isinstance(int(updated_mark), int):
-                                    if 0 <= int(updated_mark) <= 100:
-                                        updated_grade = input(f'Enter the new grade for {update_student.first_name} {update_student.last_name}: ')
-                                        new_grade = update_student.grades.replace(grades_list[idx], updated_grade)
-                                        new_mark = update_student.marks.replace(marks_list[idx], updated_mark)
-                                        update_student.update_student_record(new_grade, new_mark)
-                                    else:
-                                        print('New mark must be valid (between 0 to 100!)')         
-                                else:
-                                    print(f'The current grade and mark for {update_student.first_name} {update_student.last_name} is {update_student.grades} ({update_student.marks}%)')
-                                    new_mark = input(f'Enter the new mark for {update_student.first_name} {update_student.last_name}: ')
-                                    if isinstance(int(new_mark), int):
-                                        if 0 <= int(new_mark) <= 100:
-                                            new_grade = input(f'Enter the new grade for {update_student.first_name} {update_student.last_name}: ')
+                            if current_professor.course_id:
+                                Grades.display_grades_by_course(current_professor.course_id)
+                                student_email = input('Enter the email of the student you would like to edit: ')
+                                update_student = get_student(student_email)
+                                if update_student:
+                                    course_list = update_student.course_ids.split('|')
+                                    grades_list = update_student.grades.split('|')
+                                    marks_list = update_student.marks.split('|')
+                                    idx = course_list.index(current_professor.course_id)
+                                    updated_mark = input(f'Enter the new mark for {update_student.first_name} {update_student.last_name}: ')
+                                    if isinstance(int(updated_mark), int):
+                                        if 0 <= int(updated_mark) <= 100:
+                                            updated_grade = input(f'Enter the new grade for {update_student.first_name} {update_student.last_name}: ')
+                                            new_grade = update_student.grades.replace(grades_list[idx], updated_grade)
+                                            new_mark = update_student.marks.replace(marks_list[idx], updated_mark)
                                             update_student.update_student_record(new_grade, new_mark)
                                         else:
-                                            print('New mark must be valid (between 0 to 100!)')
+                                            print('New mark must be valid (between 0 to 100!)')         
                                     else:
-                                        print('Please enter a valid integer!')
+                                        print(f'The current grade and mark for {update_student.first_name} {update_student.last_name} is {update_student.grades} ({update_student.marks}%)')
+                                        new_mark = input(f'Enter the new mark for {update_student.first_name} {update_student.last_name}: ')
+                                        if isinstance(int(new_mark), int):
+                                            if 0 <= int(new_mark) <= 100:
+                                                new_grade = input(f'Enter the new grade for {update_student.first_name} {update_student.last_name}: ')
+                                                update_student.update_student_record(new_grade, new_mark)
+                                            else:
+                                                print('New mark must be valid (between 0 to 100!)')
+                                        else:
+                                            print('Please enter a valid integer!')
+                                else:
+                                    print('Please try again!')
                             else:
-                                print('Please try again!')
+                                print('You are currently not teaching any courses.')
                         elif choice == '4':
                             print('Changing your password...')
                             current_user.change_password()
@@ -930,16 +978,33 @@ def checkmygrade_main_menu():
                             break
                         else: 
                             print('Enter a valid choice!')
-                        
         elif choice == '2':
+            print('Signing up...')
+            first_name = input('Enter your first name: ')
+            last_name = input('Enter your last name: ')
+            email_address = input('Enter you email address: ').strip()
+            password = getpass.getpass('Enter your password: ').strip()
+            print('''
+                Are you a...
+                1. Student
+                2. Professor
+                ''')
+            role = input('Enter number of your status: ')
+            if role == '1':
+                new_user=LoginUser(email_address, password)
+                new_user.signup(email_address, password, first_name, last_name, 'student')
+            elif role == '2':
+                new_user=LoginUser(email_address, password)
+                new_user.signup(email_address, password, first_name, last_name, 'professor')   
+            else:
+                print('Invalid choice selected!')              
+        elif choice == '3':
             print('Exiting CheckMyGrade... Goodbye!')
             break
         else:
             print('Invalid choice! Please try again.')
 
 if __name__ == '__main__':
-    # uncomment out to run unit tests
-    # unittest.main()
     checkmygrade_main_menu()
 
            
